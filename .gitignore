@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+output/
+.pytest_cache/
+career-ops-upstream/

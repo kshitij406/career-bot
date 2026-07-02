@@ -1,0 +1,26 @@
+# Owner profile — consumed by src/score.py to build the scoring prompt,
+# and by src/notify.py for the alert threshold.
+
+candidate:
+  name: Kshitij
+  summary: >
+    Computer Science placement-year student, transferring into University of Kent,
+    BSc Computer Science (Hons) with a Year in Industry, Stage 2, starting
+    28 September 2026. Seeking a UK-based (or UK-remote-eligible) software
+    placement / year-in-industry / internship role for the 2026-27 academic year.
+  experience:
+    - "C#/.NET 8 — CubeStone Consulting: Fleet Management API, SAP HANA, Dapper"
+    - "Next.js/React — Imatic Technologies: insurtech dashboard"
+    - "Go, Python, general full-stack development"
+
+target:
+  role_families: [backend, full-stack, DevOps, AI/ML, general software engineering]
+  role_level: placement year / year in industry / internship (not senior, not permanent full-time)
+  location: UK-based or remote-eligible for a UK-based candidate
+  start: around September 2026
+
+scoring:
+  # Model for the scoring call. claude-haiku-4-5 is the cheap option if volume gets high.
+  model: claude-opus-4-8
+  # Jobs scoring >= threshold (0-100) trigger a Discord notification.
+  threshold: 60

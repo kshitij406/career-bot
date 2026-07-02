@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Software Engineer Industrial Placement",
+    "company": "Monzo",
+    "url": "https://job-boards.greenhouse.io/monzo/jobs/1001",
+    "location": "London, UK",
+    "description": "Join our backend team as a placement student working on payments infrastructure in Go and Python."
+  },
+  {
+    "title": "Senior Staff Engineer",
+    "company": "Palantir",
+    "url": "https://jobs.lever.co/palantir/2002",
+    "location": "London, UK",
+    "description": "Lead a team of senior engineers building large-scale distributed systems."
+  },
+  {
+    "title": "Software Engineering Intern",
+    "company": "ElevenLabs",
+    "url": "https://jobs.ashbyhq.com/elevenlabs/3003",
+    "location": "Remote UK",
+    "description": "Summer internship working on speech synthesis infrastructure."
+  }
+]

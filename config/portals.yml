@@ -1,0 +1,94 @@
+# Portal scanner configuration — consumed by src/scan.py.
+#
+# Only public ATS APIs (Greenhouse / Ashby / Lever). No Indeed, no LinkedIn — ever.
+# Provider is auto-detected from careers_url:
+#   greenhouse:  job-boards(.eu)?.greenhouse.io/<slug>  -> boards-api.greenhouse.io/v1/boards/<slug>/jobs
+#   ashby:       jobs.ashbyhq.com/<slug>                -> api.ashbyhq.com/posting-api/job-board/<slug>
+#   lever:       jobs.lever.co/<slug>                   -> api.lever.co/v0/postings/<slug>
+#
+# All slugs below were verified live on 2026-07-02.
+
+# Cheap keyword pre-filter applied BEFORE the (paid) LLM scoring call.
+# A title must match >=1 positive and 0 negative keywords (case-insensitive substring).
+title_filter:
+  positive:
+    - intern
+    - internship
+    - placement
+    - industrial
+    - "year in industry"
+    - sandwich
+    - undergraduate
+    - co-op
+    - "12 month"
+    - "12-month"
+    - apprentice
+    - "early careers"
+    - "student"
+  negative:
+    - senior
+    - staff
+    - principal
+    - lead
+    - head of
+    - director
+    - manager
+    - phd
+    - postdoc
+    - recruiter
+    - marketing
+    - sales
+    - legal
+    - finance intern
+    - hr
+
+companies:
+  # -- UK fintech / consumer tech --
+  - name: Monzo
+    careers_url: https://job-boards.greenhouse.io/monzo
+  - name: GoCardless
+    careers_url: https://job-boards.greenhouse.io/gocardless
+  - name: Cloudflare
+    careers_url: https://job-boards.greenhouse.io/cloudflare
+  - name: Ocado Group
+    careers_url: https://job-boards.greenhouse.io/ocadogroup
+
+  # -- UK AI / deep tech --
+  - name: Speechmatics
+    careers_url: https://job-boards.greenhouse.io/speechmatics
+  - name: Wayve
+    careers_url: https://job-boards.greenhouse.io/wayve
+  - name: PhysicsX
+    careers_url: https://job-boards.greenhouse.io/physicsx
+  - name: Graphcore
+    careers_url: https://job-boards.greenhouse.io/graphcore
+  - name: PolyAI
+    careers_url: https://job-boards.eu.greenhouse.io/polyai
+  - name: Isomorphic Labs
+    careers_url: https://job-boards.greenhouse.io/isomorphiclabs
+  - name: Stability AI
+    careers_url: https://job-boards.greenhouse.io/stabilityai
+  - name: Helsing
+    careers_url: https://job-boards.greenhouse.io/helsing
+
+  # -- Ashby-based --
+  - name: ElevenLabs
+    careers_url: https://jobs.ashbyhq.com/elevenlabs
+  - name: Synthesia
+    careers_url: https://jobs.ashbyhq.com/synthesia
+  - name: Faculty
+    careers_url: https://jobs.ashbyhq.com/faculty
+  - name: Monumental
+    careers_url: https://jobs.ashbyhq.com/monumental
+
+  # -- Lever-based --
+  - name: Palantir
+    careers_url: https://jobs.lever.co/palantir
+  - name: Spotify
+    careers_url: https://jobs.lever.co/spotify
+
+  # -- US/global with UK offices (Greenhouse, from career-ops upstream, verified) --
+  - name: Intercom
+    careers_url: https://job-boards.greenhouse.io/intercom
+  - name: Vercel
+    careers_url: https://job-boards.greenhouse.io/vercel
