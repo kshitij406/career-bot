@@ -57,9 +57,9 @@ def _model():
     try:
         with open("config/profile.yml", "r", encoding="utf-8") as f:
             profile = yaml.safe_load(f)
-        return profile.get("scoring", {}).get("model", "anthropic/claude-sonnet-4.5")
+        return profile.get("scoring", {}).get("model", "meta-llama/llama-3.3-70b-instruct:free")
     except FileNotFoundError:
-        return "anthropic/claude-sonnet-4.5"
+        return "meta-llama/llama-3.3-70b-instruct:free"
 
 
 def tailor_cv(cv_text, jd_text):

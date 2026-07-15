@@ -27,7 +27,7 @@ TITLE_FILTER_CFG = {
 PROFILE = {
     "candidate": {"summary": "test candidate"},
     "target": {"role_families": ["backend"]},
-    "scoring": {"model": "anthropic/claude-sonnet-4.5", "threshold": 60},
+    "scoring": {"model": "meta-llama/llama-3.3-70b-instruct:free", "threshold": 60},
 }
 
 

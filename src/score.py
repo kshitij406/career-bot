@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -91,12 +92,17 @@ def _call_openrouter(model, api_key, system_prompt, user_message):
 
 def score_jobs(jobs, profile, cv_text):
     """Score each job in place (returns a new list) via OpenRouter."""
-    model = profile.get("scoring", {}).get("model", "anthropic/claude-sonnet-4.5")
+    model = profile.get("scoring", {}).get("model", "meta-llama/llama-3.3-70b-instruct:free")
     api_key = os.environ["OPENROUTER_API_KEY"]
     system_prompt = build_system_prompt(profile, cv_text)
 
     scored = []
-    for job in jobs:
+    for i, job in enumerate(jobs):
+        if i > 0 and model.endswith(":free"):
+            # ponytail: free-tier OpenRouter models cap at ~20 req/min; a flat
+            # delay is the simplest way to stay under that. Swap for a token
+            # bucket if this ever needs to run faster than one job per 3s.
+            time.sleep(3)
         job = dict(job)
         try:
             text = _call_openrouter(model, api_key, system_prompt, _job_user_message(job))
