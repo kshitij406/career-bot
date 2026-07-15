@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+credentials.json
 output/
 .pytest_cache/
 career-ops-upstream/

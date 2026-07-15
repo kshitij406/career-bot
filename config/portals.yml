@@ -6,7 +6,7 @@
 #   ashby:       jobs.ashbyhq.com/<slug>                -> api.ashbyhq.com/posting-api/job-board/<slug>
 #   lever:       jobs.lever.co/<slug>                   -> api.lever.co/v0/postings/<slug>
 #
-# All slugs below were verified live on 2026-07-02.
+# All slugs below were verified live on 2026-07-15.
 
 # Cheap keyword pre-filter applied BEFORE the (paid) LLM scoring call.
 # A title must match >=1 positive and 0 negative keywords (case-insensitive substring).
@@ -52,6 +52,14 @@ companies:
     careers_url: https://job-boards.greenhouse.io/cloudflare
   - name: Ocado Group
     careers_url: https://job-boards.greenhouse.io/ocadogroup
+  - name: Trustpilot
+    careers_url: https://job-boards.greenhouse.io/trustpilot
+  - name: Skyscanner
+    careers_url: https://job-boards.greenhouse.io/skyscanner
+  - name: SumUp
+    careers_url: https://job-boards.greenhouse.io/sumup
+  - name: GitLab
+    careers_url: https://job-boards.greenhouse.io/gitlab
 
   # -- UK AI / deep tech --
   - name: Speechmatics
@@ -80,12 +88,26 @@ companies:
     careers_url: https://jobs.ashbyhq.com/faculty
   - name: Monumental
     careers_url: https://jobs.ashbyhq.com/monumental
+  - name: Trainline
+    careers_url: https://jobs.ashbyhq.com/trainline
+  - name: Multiverse
+    careers_url: https://jobs.ashbyhq.com/multiverse
+  - name: Pleo
+    careers_url: https://jobs.ashbyhq.com/pleo
+  - name: Lendable
+    careers_url: https://jobs.ashbyhq.com/lendable
+  - name: Paddle
+    careers_url: https://jobs.ashbyhq.com/paddle
 
   # -- Lever-based --
   - name: Palantir
     careers_url: https://jobs.lever.co/palantir
   - name: Spotify
     careers_url: https://jobs.lever.co/spotify
+  - name: Farfetch
+    careers_url: https://jobs.lever.co/farfetch
+  - name: Zopa
+    careers_url: https://jobs.lever.co/zopa
 
   # -- US/global with UK offices (Greenhouse, from career-ops upstream, verified) --
   - name: Intercom

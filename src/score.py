@@ -1,22 +1,14 @@
-"""Score scanned jobs against the candidate profile using the Anthropic API."""
+"""Score scanned jobs against the candidate profile using OpenRouter's chat completions API."""
 
 import json
+import os
+import re
 import sys
+import urllib.request
 
-import anthropic
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-SCHEMA = {
-    "type": "object",
-    "properties": {
-        "score": {"type": "integer"},
-        "reason": {"type": "string"},
-        "role_type": {"type": "string"},
-    },
-    "required": ["score", "reason", "role_type"],
-    "additionalProperties": False,
-}
-
-SYSTEM_PROMPT_TEMPLATE = """You score job listings for one specific candidate. Return JSON only.
+SYSTEM_PROMPT_TEMPLATE = """You score job listings for one specific candidate.
 
 Candidate profile:
 {profile_yaml}
@@ -30,9 +22,14 @@ Score each listing 0-100 for fit. Scoring rules, in priority order:
 3. Weight up (add, don't gate): stack overlap with C#/.NET, React/Next.js, Go, Python; explicit placement/intern/year-in-industry framing; 9-13 month duration; London/Kent/remote-UK location.
 4. When the description is missing, score on title, company, and location alone without penalizing the gap.
 role_type: one of "placement", "internship", "graduate", "other".
-reason: one sentence, concrete, mentioning the decisive factor."""
+reason: one sentence, concrete, mentioning the decisive factor.
+
+Respond with ONLY a JSON object, no markdown fences, no extra text:
+{{"score": <integer 0-100>, "reason": <string>, "role_type": <string>}}"""
 
 DESCRIPTION_TRUNCATE = 4000
+
+_JSON_FENCE_RE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.DOTALL)
 
 
 def build_system_prompt(profile, cv_text):
@@ -53,25 +50,57 @@ def _job_user_message(job):
     )
 
 
+def _extract_json(text):
+    """Some models wrap JSON in markdown fences despite instructions — strip if present."""
+    text = text.strip()
+    m = _JSON_FENCE_RE.search(text)
+    if m:
+        text = m.group(1)
+    return json.loads(text)
+
+
+def _call_openrouter(model, api_key, system_prompt, user_message):
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            "max_tokens": 1024,
+            # Best-effort: honored by many but not all OpenRouter providers.
+            # The system-prompt instruction + _extract_json fallback cover the rest.
+            "response_format": {"type": "json_object"},
+        }
+    ).encode("utf-8")
+    req = urllib.request.Request(
+        OPENROUTER_URL,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/career-bot",
+            "X-Title": "career-bot",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
+
+
 def score_jobs(jobs, profile, cv_text):
-    """Score each job in place (returns a new list) using the Anthropic API."""
-    model = profile.get("scoring", {}).get("model", "claude-opus-4-8")
+    """Score each job in place (returns a new list) via OpenRouter."""
+    model = profile.get("scoring", {}).get("model", "anthropic/claude-sonnet-4.5")
+    api_key = os.environ["OPENROUTER_API_KEY"]
     system_prompt = build_system_prompt(profile, cv_text)
-    client = anthropic.Anthropic()
 
     scored = []
     for job in jobs:
         job = dict(job)
         try:
-            resp = client.messages.create(
-                model=model,
-                max_tokens=1024,
-                system=system_prompt,
-                output_config={"format": {"type": "json_schema", "schema": SCHEMA}},
-                messages=[{"role": "user", "content": _job_user_message(job)}],
-            )
-            text = next(b.text for b in resp.content if b.type == "text")
-            data = json.loads(text)
+            text = _call_openrouter(model, api_key, system_prompt, _job_user_message(job))
+            data = _extract_json(text)
             job["score"] = data["score"]
             job["reason"] = data["reason"]
             job["role_type"] = data["role_type"]

@@ -20,7 +20,9 @@ target:
   start: around September 2026
 
 scoring:
-  # Model for the scoring call. claude-haiku-4-5 is the cheap option if volume gets high.
-  model: claude-opus-4-8
+  # OpenRouter model slug for the scoring call — check current ids/pricing at
+  # https://openrouter.ai/models before running. A cheaper model is worth
+  # switching to if volume gets high.
+  model: anthropic/claude-sonnet-4.5
   # Jobs scoring >= threshold (0-100) trigger a Discord notification.
   threshold: 60

@@ -1,0 +1,16 @@
+# Gmail alert-email parsing — consumed by src/gmail_scan.py.
+#
+# NOT scraping: this parses job-alert emails you already opted into on
+# linkedin.com/indeed.com, via the read-only gmail.readonly scope.
+# Requires GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_REFRESH_TOKEN env
+# vars (see README "Gmail alerts setup") — skipped silently if unset.
+
+enabled: true
+
+# Gmail search "newer_than" window. Keep it comfortably longer than the cron
+# interval (6h) so a slow run or a missed cron tick can't drop an alert.
+lookback: "2d"
+
+senders:
+  linkedin: jobalerts-noreply@linkedin.com
+  indeed: alert@indeed.com

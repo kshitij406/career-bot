@@ -6,13 +6,16 @@ This module is never imported or invoked by run.py or the GitHub Actions
 workflow. It is a manual, human-triggered tool only.
 """
 
+import json
 import os
 import shutil
 import subprocess
 import sys
+import urllib.request
 
 import yaml
-import anthropic
+
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 TAILOR_PROMPT = """You are tailoring a candidate's CV to a specific job description.
 
@@ -54,24 +57,35 @@ def _model():
     try:
         with open("config/profile.yml", "r", encoding="utf-8") as f:
             profile = yaml.safe_load(f)
-        return profile.get("scoring", {}).get("model", "claude-opus-4-8")
+        return profile.get("scoring", {}).get("model", "anthropic/claude-sonnet-4.5")
     except FileNotFoundError:
-        return "claude-opus-4-8"
+        return "anthropic/claude-sonnet-4.5"
 
 
 def tailor_cv(cv_text, jd_text):
-    client = anthropic.Anthropic()
-    resp = client.messages.create(
-        model=_model(),
-        max_tokens=4096,
-        messages=[
-            {
-                "role": "user",
-                "content": TAILOR_PROMPT.format(cv=cv_text, jd=jd_text),
-            }
-        ],
+    body = json.dumps(
+        {
+            "model": _model(),
+            "messages": [
+                {"role": "user", "content": TAILOR_PROMPT.format(cv=cv_text, jd=jd_text)}
+            ],
+            "max_tokens": 4096,
+        }
+    ).encode("utf-8")
+    req = urllib.request.Request(
+        OPENROUTER_URL,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/career-bot",
+            "X-Title": "career-bot",
+        },
+        method="POST",
     )
-    return next(b.text for b in resp.content if b.type == "text")
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
 
 
 def main():
