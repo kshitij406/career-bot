@@ -92,7 +92,7 @@ def _call_openrouter(model, api_key, system_prompt, user_message):
 
 def score_jobs(jobs, profile, cv_text):
     """Score each job in place (returns a new list) via OpenRouter."""
-    model = profile.get("scoring", {}).get("model", "meta-llama/llama-3.3-70b-instruct:free")
+    model = profile.get("scoring", {}).get("model", "openai/gpt-oss-20b:free")
     api_key = os.environ["OPENROUTER_API_KEY"]
     system_prompt = build_system_prompt(profile, cv_text)
 

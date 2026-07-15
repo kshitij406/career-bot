@@ -22,7 +22,10 @@ target:
 scoring:
   # OpenRouter model slug for the scoring call — must end in ":free" to avoid
   # billing. Check current free models at https://openrouter.ai/models?max_price=0
-  # (the list changes over time; verify before switching).
-  model: meta-llama/llama-3.3-70b-instruct:free
+  # (the list changes over time; verify before switching). Several free models
+  # (Llama, Qwen, Gemma) are served by one shared, frequently-oversubscribed
+  # upstream and return 429 constantly — openai/gpt-oss-20b:free was the one
+  # that actually responded reliably when this was last checked (2026-07-15).
+  model: openai/gpt-oss-20b:free
   # Jobs scoring >= threshold (0-100) trigger a Discord notification.
   threshold: 60

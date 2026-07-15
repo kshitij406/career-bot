@@ -57,9 +57,9 @@ def _model():
     try:
         with open("config/profile.yml", "r", encoding="utf-8") as f:
             profile = yaml.safe_load(f)
-        return profile.get("scoring", {}).get("model", "meta-llama/llama-3.3-70b-instruct:free")
+        return profile.get("scoring", {}).get("model", "openai/gpt-oss-20b:free")
     except FileNotFoundError:
-        return "meta-llama/llama-3.3-70b-instruct:free"
+        return "openai/gpt-oss-20b:free"
 
 
 def tailor_cv(cv_text, jd_text):
