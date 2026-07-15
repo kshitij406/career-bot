@@ -4,6 +4,7 @@ No scraping. No Indeed. No LinkedIn. Read-only GETs against the three
 documented ATS JSON APIs only.
 """
 
+import html
 import json
 import re
 import sys
@@ -18,6 +19,13 @@ GREENHOUSE_RE = re.compile(r"job-boards(?:\.eu)?\.greenhouse\.io/([^/?#]+)")
 ASHBY_RE = re.compile(r"jobs\.ashbyhq\.com/([^/?#]+)")
 LEVER_RE = re.compile(r"jobs\.lever\.co/([^/?#]+)")
 
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _html_to_text(raw_html):
+    """Strip tags and unescape entities — good enough for keyword matching."""
+    return html.unescape(_HTML_TAG_RE.sub(" ", raw_html or "")).strip()
+
 
 def _get_json(url, timeout):
     if not url.startswith("https://"):
@@ -29,7 +37,7 @@ def _get_json(url, timeout):
 
 def _scan_greenhouse(slug, company):
     data = _get_json(
-        f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs", timeout=30
+        f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true", timeout=30
     )
     jobs = []
     for j in data.get("jobs", []):
@@ -39,7 +47,7 @@ def _scan_greenhouse(slug, company):
                 "url": j.get("absolute_url", ""),
                 "company": company,
                 "location": (j.get("location") or {}).get("name", ""),
-                "description": "",
+                "description": _html_to_text(j.get("content", "")),
             }
         )
     return jobs
@@ -59,7 +67,7 @@ def _scan_ashby(slug, company):
                         "url": j.get("jobUrl", ""),
                         "company": company,
                         "location": j.get("location", ""),
-                        "description": "",
+                        "description": j.get("descriptionPlain", "") or "",
                     }
                 )
             return jobs
