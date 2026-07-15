@@ -128,6 +128,32 @@ def test_notify_dry_run(capsys=None):
     notify_module.notify(jobs, threshold=60)
 
 
+def test_notify_survives_discord_failure():
+    import urllib.request as urllib_request_module
+
+    def _raise(*args, **kwargs):
+        raise urllib_request_module.URLError("boom")
+
+    os.environ["DISCORD_WEBHOOK_URL"] = "https://discord.com/api/webhooks/fake/fake"
+    original_urlopen = urllib_request_module.urlopen
+    urllib_request_module.urlopen = _raise
+    try:
+        jobs = [
+            {
+                "title": "Software Engineer Industrial Placement",
+                "company": "Monzo",
+                "url": "https://job-boards.greenhouse.io/monzo/jobs/1001",
+                "location": "London, UK",
+                "score": 85,
+                "reason": "Strong stack overlap.",
+            }
+        ]
+        notify_module.notify(jobs, threshold=60)  # must not raise
+    finally:
+        urllib_request_module.urlopen = original_urlopen
+        os.environ.pop("DISCORD_WEBHOOK_URL", None)
+
+
 if __name__ == "__main__":
     test_title_filter()
     print("test_title_filter passed")
@@ -141,4 +167,6 @@ if __name__ == "__main__":
     print("test_parse_indeed_alert passed")
     test_notify_dry_run()
     print("test_notify_dry_run passed")
+    test_notify_survives_discord_failure()
+    print("test_notify_survives_discord_failure passed")
     print("all tests passed")

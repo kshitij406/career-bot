@@ -2,9 +2,11 @@
 
 import json
 import os
+import sys
 import urllib.request
 
 BATCH_SIZE = 10
+USER_AGENT = "career-bot/1.0"
 
 
 def _build_embed(job):
@@ -37,8 +39,11 @@ def notify(jobs, threshold):
         req = urllib.request.Request(
             webhook_url,
             data=body,
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            resp.read()
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                resp.read()
+        except Exception as e:  # noqa: BLE001 - a Discord outage must not lose a scored batch
+            print(f"warning: Discord notify failed for a batch: {e}", file=sys.stderr)
