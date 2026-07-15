@@ -40,4 +40,4 @@ tests/                offline fixture tests (no network, no API key)
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`
 
 ## Profile context
-Owner: CS placement-year student, University of Kent BSc Computer Science (Hons) with a Year in Industry, Stage 2 starting 28 September 2026. Target: UK-based or UK-remote software placement / year-in-industry / internship roles for 2026-27 — backend, full-stack, DevOps, AI/ML, general SWE (breadth over specialization). Experience weighting: C#/.NET 8, Next.js/React, Go, Python. Keep this in sync with `config/profile.yml`.
+Owner: CS placement-year student, University of Kent BSc Computer Science (Hons) with a Year in Industry, Stage 2 starting September 2026. The placement year itself starts around/after July 2027, once Stage 2 concludes. Target: UK-based or UK-remote software placement / year-in-industry / internship roles for the 2027-28 cycle — backend, full-stack, DevOps, AI/ML, general SWE (breadth over specialization). Experience weighting: C#/.NET 8, Next.js/React, Go, Python. Keep this in sync with `config/profile.yml`.

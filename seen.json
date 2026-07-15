@@ -1,1 +1,314 @@
-{}
+{
+  "https://boards.greenhouse.io/cloudflare/jobs/7796077?gh_jid=7796077": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Professional Services Intern \u2013 Global Customer Services (Fall 2026)"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/7799138?gh_jid=7799138": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Global Trade Compliance Intern (Summer 2026)"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8013562?gh_jid=8013562": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Network Strategy Intern (Fall 2026)"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8031027?gh_jid=8031027": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Network Strategy Intern (Fall 2026)"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8041135?gh_jid=8041135": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Technical Support Engineer Intern (Fall 2026)"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8052785?gh_jid=8052785": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Software Engineer Intern (Fall 2026) - Austin, TX"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8053437?gh_jid=8053437": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Public Policy Intern"
+  },
+  "https://boards.greenhouse.io/cloudflare/jobs/8054093?gh_jid=8054093": {
+    "company": "Cloudflare",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Brand Social Media Intern (Fall 2026)"
+  },
+  "https://helsing.ai/jobs/4865788101?gh_jid=4865788101": {
+    "company": "Helsing",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Helsing \u2013 Formula Student Programme | Closed Opportunity"
+  },
+  "https://job-boards.greenhouse.io/gocardless/jobs/7916619": {
+    "company": "GoCardless",
+    "first_seen": "2026-07-15",
+    "score": 50,
+    "title": "Data Analyst (12 month FTC)"
+  },
+  "https://job-boards.greenhouse.io/gocardless/jobs/8020873": {
+    "company": "GoCardless",
+    "first_seen": "2026-07-15",
+    "score": 50,
+    "title": "Customer Operations Representative (12-month FTC)"
+  },
+  "https://job-boards.greenhouse.io/gocardless/jobs/8059763": {
+    "company": "GoCardless",
+    "first_seen": "2026-07-15",
+    "score": 50,
+    "title": "Fraud Investigator (12-month FTC)"
+  },
+  "https://jobs.ashbyhq.com/lendable/68e876da-fa27-4b9e-ad09-ca4805efa8a5": {
+    "company": "Lendable",
+    "first_seen": "2026-07-15",
+    "score": 50,
+    "title": "Operations & Process Improvement Intern - Financial Crime Ops"
+  },
+  "https://jobs.ashbyhq.com/multiverse/c44d44ea-24e0-46a1-9f9b-78b8eb5b1734": {
+    "company": "Multiverse",
+    "first_seen": "2026-07-15",
+    "score": 60,
+    "title": "Operations Specialist (12-Month FTC)"
+  },
+  "https://jobs.ashbyhq.com/trainline/b2be2997-77c7-4e13-805d-46dde6d397e3": {
+    "company": "Trainline",
+    "first_seen": "2026-07-15",
+    "score": 60,
+    "title": "Management Accountant - 12 Month FTC"
+  },
+  "https://jobs.lever.co/palantir/09846827-b931-4a9f-bd64-c3bb8860187b": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 15,
+    "title": "Privacy and Civil Liberties Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/1b6f1d82-d459-4dea-8bc2-8d2ffe6f881a": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 56,
+    "title": "Forward Deployed Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/315f695d-04d1-4a9a-848e-cb2bec7a997e": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/373367a9-3160-49d8-b7af-2efec062fad1": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Production Infrastructure"
+  },
+  "https://jobs.lever.co/palantir/373eb939-6f57-4836-8479-be79a5e07249": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/37964982-9b4c-471e-a1d8-fb8f45d7f116": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Production Infrastructure"
+  },
+  "https://jobs.lever.co/palantir/395a4483-fc3d-4b77-a500-501923fd0976": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - AUS Government"
+  },
+  "https://jobs.lever.co/palantir/3ab9e715-1ea9-4c6c-ad50-7340eac14e86": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Production Infrastructure"
+  },
+  "https://jobs.lever.co/palantir/3db7e40a-28e0-4ad1-96c5-93de5bc96aa9": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/4d29249a-d7e8-4c39-880d-3b35d7b2f6f6": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - Commercial"
+  },
+  "https://jobs.lever.co/palantir/5c4c65c5-77da-4d36-856c-4ade87631019": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - USG"
+  },
+  "https://jobs.lever.co/palantir/5c7bb70c-83ea-43e7-8055-0c8f319f4333": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - USG"
+  },
+  "https://jobs.lever.co/palantir/655f9937-a4ce-4e7d-80e2-a6659af07329": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Year at Palantir - Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/75cc1c09-8ebd-44c8-b3bc-d122cd1fecb3": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - Commercial"
+  },
+  "https://jobs.lever.co/palantir/774cf5c9-bf6a-4d77-bf60-d50ef1beb1a0": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 52,
+    "title": "Deployment Strategist, Internship"
+  },
+  "https://jobs.lever.co/palantir/7d69cf8a-06fd-4f05-bd84-27149db29c4d": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/8bcf4f33-0a79-4248-bbfd-49ac4be9dd8e": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Defense Tech"
+  },
+  "https://jobs.lever.co/palantir/8f362a1f-1eff-4327-94c1-ff46e2101c69": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/9e40d77f-b07c-437b-98e7-def9b0184d89": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - Intel"
+  },
+  "https://jobs.lever.co/palantir/a483f41b-0da9-42ea-8ed6-cbf6eb93cc6d": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Defense Tech"
+  },
+  "https://jobs.lever.co/palantir/a49d4181-a289-435a-b581-7f5af0497c8e": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Deployment Strategist, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/ac0dc094-2480-43c2-8495-26ade227ff4f": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 50,
+    "title": "Forward Deployed Software Engineer, Internship - France"
+  },
+  "https://jobs.lever.co/palantir/b229baac-494b-4a0d-9a13-2e38806e06f3": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Infrastructure"
+  },
+  "https://jobs.lever.co/palantir/bdcfb29f-4f27-42de-933f-7f83a359b9f0": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/cccfe1bd-f15b-4fe5-b044-c793e7961c1b": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - Defense Tech"
+  },
+  "https://jobs.lever.co/palantir/cf5f44ff-1b0b-4752-bcd4-2dc88798f25b": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/d5486403-c050-4920-b2e0-91b69b61ebb2": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - Commercial"
+  },
+  "https://jobs.lever.co/palantir/d582cd84-14fd-4aa3-b413-15982d286bd9": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - Poland"
+  },
+  "https://jobs.lever.co/palantir/e0010393-c300-446f-bf67-fa2ef067f16f": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/e27af7ab-41fc-40c9-b31d-02c6cb1c505c": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship"
+  },
+  "https://jobs.lever.co/palantir/e6789b17-62fb-4226-a079-f8c17ff19e2d": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - Commercial"
+  },
+  "https://jobs.lever.co/palantir/e6ff8bf2-135e-474d-ad37-24f490ae1dd2": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Forward Deployed Software Engineer, Internship - US Government"
+  },
+  "https://jobs.lever.co/palantir/f17e98d0-046a-4e6e-9d65-ed0b12dd0ff7": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Defense Tech"
+  },
+  "https://jobs.lever.co/palantir/f221738b-e97c-4ce3-a12a-17ada2b855e4": {
+    "company": "Palantir",
+    "first_seen": "2026-07-15",
+    "score": 46,
+    "title": "Software Engineer, Internship - Infrastructure"
+  },
+  "https://sumup.com/careers/positions/8285272002?gh_jid=8285272002": {
+    "company": "SumUp",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "AI Product Intern"
+  },
+  "https://sumup.com/careers/positions/8402313002?gh_jid=8402313002": {
+    "company": "SumUp",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Corporate Treasury Intern"
+  },
+  "https://sumup.com/careers/positions/8616619002?gh_jid=8616619002": {
+    "company": "SumUp",
+    "first_seen": "2026-07-15",
+    "score": 40,
+    "title": "Working Student - People Operations & Payroll"
+  }
+}

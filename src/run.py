@@ -3,9 +3,6 @@
 Run as: python -m src.run
 """
 
-import os
-import sys
-
 import yaml
 
 from src.gmail_scan import scan_gmail_alerts
@@ -36,26 +33,12 @@ def main():
     seen = load_seen()
     new_jobs = [j for j in filtered if is_new(j, seen)]
 
-    if new_jobs:
-        if not os.environ.get("OPENROUTER_API_KEY"):
-            print(
-                "OPENROUTER_API_KEY is not set — cannot score jobs. "
-                "Set it and re-run.",
-                file=sys.stderr,
-            )
-            sys.exit(1)
-        scored = score_jobs(new_jobs, profile, cv_text)
-    else:
-        scored = []
+    scored = score_jobs(new_jobs, profile, cv_text) if new_jobs else []
 
     threshold = profile.get("scoring", {}).get("threshold", 60)
     notify(scored, threshold)
 
     for job in scored:
-        # ponytail: a transient scoring failure must not permanently mark the
-        # job as seen — leave it out so the next run retries it.
-        if job.get("reason") == "scoring failed":
-            continue
         record(job, seen)
     save_seen(seen)
 

@@ -27,7 +27,13 @@ TITLE_FILTER_CFG = {
 PROFILE = {
     "candidate": {"summary": "test candidate"},
     "target": {"role_families": ["backend"]},
-    "scoring": {"model": "openai/gpt-oss-20b:free", "threshold": 60},
+    "scoring": {"threshold": 60},
+}
+
+AI_PROFILE = {
+    "candidate": {"summary": "test candidate"},
+    "target": {"role_families": ["backend"]},
+    "scoring": {"ai_enabled": True, "model": "openai/gpt-oss-20b:free", "threshold": 60},
 }
 
 
@@ -70,7 +76,20 @@ class _FakeHTTPResponse:
         return False
 
 
-def test_scoring(monkeypatch=None):
+def test_heuristic_scoring_needs_no_network():
+    """Default path: ai_enabled is unset/false, so no API key and no network call."""
+    os.environ.pop("OPENROUTER_API_KEY", None)
+    jobs = load_fixtures()
+    job1 = jobs[0]  # "Software Engineer Industrial Placement", London
+    scored = score_jobs([job1], PROFILE, "fake cv text")
+
+    assert len(scored) == 1
+    assert 0 <= scored[0]["score"] <= 100
+    assert scored[0]["reason"].startswith("Rule-based:")
+    assert scored[0]["role_type"] == "placement"
+
+
+def test_ai_scoring_refines_and_overrides_heuristic(monkeypatch=None):
     import urllib.request as urllib_request_module
 
     original_urlopen = urllib_request_module.urlopen
@@ -79,14 +98,36 @@ def test_scoring(monkeypatch=None):
     try:
         jobs = load_fixtures()
         job1 = jobs[0]
-        scored = score_jobs([job1], PROFILE, "fake cv text")
+        scored = score_jobs([job1], AI_PROFILE, "fake cv text")
     finally:
         urllib_request_module.urlopen = original_urlopen
+        os.environ.pop("OPENROUTER_API_KEY", None)
 
     assert len(scored) == 1
     assert scored[0]["score"] == 85
     assert scored[0]["reason"] == "Strong stack overlap."
     assert scored[0]["role_type"] == "placement"
+
+
+def test_ai_scoring_falls_back_to_heuristic_on_failure():
+    import urllib.request as urllib_request_module
+
+    def _raise(*args, **kwargs):
+        raise urllib_request_module.URLError("rate limited")
+
+    original_urlopen = urllib_request_module.urlopen
+    urllib_request_module.urlopen = _raise
+    os.environ["OPENROUTER_API_KEY"] = "fake-key-for-tests"
+    try:
+        jobs = load_fixtures()
+        job1 = jobs[0]
+        scored = score_jobs([job1], AI_PROFILE, "fake cv text")  # must not raise
+    finally:
+        urllib_request_module.urlopen = original_urlopen
+        os.environ.pop("OPENROUTER_API_KEY", None)
+
+    assert len(scored) == 1
+    assert scored[0]["reason"].startswith("Rule-based:")
 
 
 def test_parse_linkedin_alert():
@@ -159,8 +200,12 @@ if __name__ == "__main__":
     print("test_title_filter passed")
     test_dedup()
     print("test_dedup passed")
-    test_scoring()
-    print("test_scoring passed")
+    test_heuristic_scoring_needs_no_network()
+    print("test_heuristic_scoring_needs_no_network passed")
+    test_ai_scoring_refines_and_overrides_heuristic()
+    print("test_ai_scoring_refines_and_overrides_heuristic passed")
+    test_ai_scoring_falls_back_to_heuristic_on_failure()
+    print("test_ai_scoring_falls_back_to_heuristic_on_failure passed")
     test_parse_linkedin_alert()
     print("test_parse_linkedin_alert passed")
     test_parse_indeed_alert()

@@ -5,9 +5,10 @@ candidate:
   name: Kshitij
   summary: >
     Computer Science placement-year student, transferring into University of Kent,
-    BSc Computer Science (Hons) with a Year in Industry, Stage 2, starting
-    28 September 2026. Seeking a UK-based (or UK-remote-eligible) software
-    placement / year-in-industry / internship role for the 2026-27 academic year.
+    BSc Computer Science (Hons) with a Year in Industry, Stage 2 starting
+    September 2026. Placement year itself starts around/after July 2027, once
+    Stage 2 concludes. Seeking a UK-based (or UK-remote-eligible) software
+    placement / year-in-industry / internship role for the 2027-28 cycle.
   experience:
     - "C#/.NET 8 — CubeStone Consulting: Fleet Management API, SAP HANA, Dapper"
     - "Next.js/React — Imatic Technologies: insurtech dashboard"
@@ -16,16 +17,23 @@ candidate:
 target:
   role_families: [backend, full-stack, DevOps, AI/ML, general software engineering]
   role_level: placement year / year in industry / internship (not senior, not permanent full-time)
-  location: UK-based or remote-eligible for a UK-based candidate
-  start: around September 2026
+  location: >
+    UK-based — onsite, hybrid, or remote. Willing to relocate anywhere in the
+    UK for the placement year; not limited to London/Kent.
+  start: around/after July 2027
 
 scoring:
-  # OpenRouter model slug for the scoring call — must end in ":free" to avoid
-  # billing. Check current free models at https://openrouter.ai/models?max_price=0
-  # (the list changes over time; verify before switching). Several free models
-  # (Llama, Qwen, Gemma) are served by one shared, frequently-oversubscribed
-  # upstream and return 429 constantly — openai/gpt-oss-20b:free was the one
-  # that actually responded reliably when this was last checked (2026-07-15).
+  # Rule-based keyword/location/stack scoring runs by default — no API key,
+  # no network call, no rate limits, always returns a usable score.
+  # Set ai_enabled: true (with OPENROUTER_API_KEY set) to let an LLM refine
+  # the score/reason on top of that. If the AI call fails for any reason
+  # (rate-limited, out of credit, provider down), the rule-based result is
+  # used untouched — a flaky AI provider can never block a notification.
+  ai_enabled: false
+  # OpenRouter model slug (only used when ai_enabled is true) — must end in
+  # ":free" to avoid billing. Check current free models at
+  # https://openrouter.ai/models?max_price=0 (the list changes over time).
+  # Free models are also capped at 50 requests/day per OpenRouter account.
   model: openai/gpt-oss-20b:free
   # Jobs scoring >= threshold (0-100) trigger a Discord notification.
   threshold: 60

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kshitij Jha — CV</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #4a4a4a;
+    --rule: #d6d6d6;
+    --accent: #1f4e79;
+    --page-width: 210mm;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ececec;
+    font-family: "Calibri", "Carlito", "Lato", Arial, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: var(--page-width);
+    max-width: 100%;
+    min-height: 297mm;
+    margin: 24px auto;
+    padding: 16mm 18mm;
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 4px 18px rgba(0,0,0,0.08);
+  }
+
+  /* ---------- Header ---------- */
+
+  header {
+    margin-bottom: 14px;
+  }
+
+  h1.name {
+    margin: 0;
+    font-size: 22pt;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: var(--ink);
+  }
+
+  .role-line {
+    margin: 2px 0 8px 0;
+    font-size: 12pt;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .contact-line {
+    font-size: 10pt;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .contact-line a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .contact-line a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .contact-sep {
+    color: var(--rule);
+    margin: 0 6px;
+  }
+
+  /* ---------- Sections ---------- */
+
+  section {
+    margin-top: 12px;
+  }
+
+  h2.section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    border-bottom: 1.5px solid var(--accent);
+    padding-bottom: 3px;
+    margin: 0 0 8px 0;
+  }
+
+  .summary {
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* ---------- Skills ---------- */
+
+  .skills-row {
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin-bottom: 4px;
+  }
+
+  .skills-row .label {
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  /* ---------- Experience / Projects ---------- */
+
+  .entry {
+    margin-bottom: 10px;
+  }
+
+  .entry:last-child { margin-bottom: 0; }
+
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    font-size: 10.5pt;
+  }
+
+  .entry-org {
+    font-weight: 700;
+  }
+
+  .entry-role {
+    font-style: italic;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .entry-dates {
+    font-size: 9.5pt;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .entry-links {
+    font-size: 9.5pt;
+    margin-top: 1px;
+  }
+
+  .entry-links a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .entry-links a:hover { text-decoration: underline; }
+
+  ul.bullets {
+    margin: 4px 0 0 0;
+    padding-left: 16px;
+  }
+
+  ul.bullets li {
+    font-size: 10.5pt;
+    line-height: 1.45;
+    margin-bottom: 2px;
+  }
+
+  /* ---------- Education ---------- */
+
+  .edu-institution {
+    font-weight: 700;
+    font-size: 10.5pt;
+  }
+
+  .edu-detail {
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+
+  .edu-meta {
+    font-size: 9.5pt;
+    color: var(--muted);
+  }
+
+  /* ---------- Awards ---------- */
+
+  ul.awards {
+    margin: 0;
+    padding-left: 16px;
+  }
+
+  ul.awards li {
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  /* ---------- Print ---------- */
+
+  @media print {
+    html, body { background: #fff; }
+    .page {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+      padding: 12mm 16mm;
+      box-shadow: none;
+    }
+    a { color: inherit !important; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1 class="name">Kshitij Jha</h1>
+    <div class="role-line">Software Developer</div>
+    <div class="contact-line">
+      Canterbury, UK
+      <span class="contact-sep">&bull;</span>
+      +44 XXXX XXXXXX
+      <span class="contact-sep">&bull;</span>
+      <a href="mailto:kshitij.j615@gmail.com">kshitij.j615@gmail.com</a>
+      <span class="contact-sep">&bull;</span>
+      <a href="https://github.com/kshitij406" target="_blank" rel="noopener">github.com/kshitij406</a>
+      <span class="contact-sep">&bull;</span>
+      <a href="https://linkedin.com/in/kshitij-jha2006" target="_blank" rel="noopener">linkedin.com/in/kshitij-jha2006</a>
+    </div>
+  </header>
+
+  <section>
+    <h2 class="section-title">Summary</h2>
+    <p class="summary">
+      Software developer experienced in building REST APIs in .NET and Node.js, developing production
+      Next.js dashboards, and Python backend scripting. Comfortable across the stack, from databases
+      to deployed interfaces. Seeking a placement year role to apply this experience in production.
+    </p>
+  </section>
+
+  <section>
+    <h2 class="section-title">Skills</h2>
+    <div class="skills-row">
+      <span class="label">Hard skills:</span>C#/.NET 8, Go, Python, JavaScript/TypeScript, React/Next.js, React Native, SQL (MSSQL, SAP HANA), Vercel, Git/GitHub Actions, Linux (Fedora)
+    </div>
+    <div class="skills-row">
+      <span class="label">Soft skills:</span>Leadership, Communication, Team Collaboration, Problem-Solving
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Experience</h2>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div><span class="entry-org">Imatic Technologies Limited (ITL)</span><span class="entry-role">Software Developer Intern</span></div>
+        <div class="entry-dates">June 2026 &ndash; September 2026</div>
+      </div>
+      <ul class="bullets">
+        <li>Configured REST APIs across .NET and Node.js backends to support production Next.js dashboard applications, working directly with MSSQL and SQL Server Management Studio (SSMS)</li>
+        <li>Built proof-of-concept Stimulsoft Reports.JS integrations within Next.js, researching and adapting undocumented integration patterns in the absence of official framework support</li>
+        <li>Presented technical demos to stakeholders that informed the company's decision to migrate reporting from Crystal Reports to Stimulsoft Reports.JS</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div><span class="entry-org">CubeStone Consulting</span><span class="entry-role">Software Developer Intern</span></div>
+        <div class="entry-dates">January 2026 &ndash; March 2026</div>
+      </div>
+      <ul class="bullets">
+        <li>Built a Fleet Management REST API solo in C#/.NET 8, using Dapper for data access against a SAP HANA demo database, including custom tables created for testing and development</li>
+        <li>Developed a React Native mobile frontend consuming the API, delivering an end-to-end fleet management solution independently</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Education</h2>
+    <div class="edu-institution">University of Kent</div>
+    <div class="edu-detail">BSc Computer Science (Hons) with Year in Industry</div>
+    <div class="edu-meta">Stage 2, Darwin College, starting September 2026 &bull; Placement year starting after July 2027</div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Projects</h2>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div><span class="entry-org">VendingMachine</span><span class="entry-role">Personal Project</span></div>
+      </div>
+      <div class="entry-links"><a href="https://github.com/kshitij406/VendingMachine" target="_blank" rel="noopener">github.com/kshitij406/VendingMachine</a></div>
+      <ul class="bullets">
+        <li>Built a full-stack Python vending machine simulation with a Tkinter GUI, a multithreaded TCP socket server, and SQLite persistence</li>
+        <li>Implemented live currency conversion (USD, GBP, INR, MUR) and sales analytics visualised with matplotlib</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div><span class="entry-org">RecordStore</span><span class="entry-role">Coursework Project</span></div>
+      </div>
+      <div class="entry-links">
+        <a href="https://github.com/kshitij406/RecordStore" target="_blank" rel="noopener">github.com/kshitij406/RecordStore</a>
+        <span class="contact-sep">&bull;</span>
+        <a href="https://recordstore-nine.vercel.app" target="_blank" rel="noopener">Live demo</a>
+      </div>
+      <ul class="bullets">
+        <li>Built a responsive record store website in HTML, CSS, and JavaScript, with album data sourced from the Deezer and Spotify APIs</li>
+        <li>Designed a Python data pipeline generating DTD-validated XML, transformed via XSLT for frontend rendering</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title">Awards</h2>
+    <ul class="awards">
+      <li>MDX Speed Coding Competition &mdash; 1st Runner-Up</li>
+      <li>Oracle Academy Database Foundations Certificate</li>
+    </ul>
+  </section>
+
+</div>
+</body>
+</html>

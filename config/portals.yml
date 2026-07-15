@@ -8,20 +8,73 @@
 #
 # All slugs below were verified live on 2026-07-15.
 
-# Cheap keyword pre-filter applied BEFORE the (paid) LLM scoring call.
-# A title must match >=1 positive and 0 negative keywords (case-insensitive substring).
+# Keyword pre-filter applied BEFORE scoring (src/score.py).
+# A title must match >=1 role keyword, >=1 positive/framing keyword, and 0
+# negative keywords (case-insensitive substring). role_keywords is what keeps
+# non-tech placements (e.g. "Management Accountant - 12 Month FTC") out —
+# without it, any title matching only a framing keyword would pass.
 title_filter:
+  role_keywords:
+    - engineer
+    - engineering
+    - developer
+    - development
+    - software
+    - programmer
+    - programming
+    - "computer science"
+    - "computer engineering"
+    - backend
+    - "back end"
+    - frontend
+    - "front end"
+    - "full stack"
+    - "full-stack"
+    - devops
+    - "machine learning"
+    - "data scientist"
+    - "data engineer"
+    - "data engineering"
+    - "data analyst"
+    - cloud
+    - infrastructure
+    - "quality assurance"
+    - qa
+    - sre
+    - cyber
+    - security
+    - technology
+    - technical
+    - systems
+    - network
   positive:
     - intern
     - internship
     - placement
+    - "placement year"
+    - "work placement"
+    - "placement scheme"
+    - "placement programme"
+    - "placement program"
     - industrial
+    - "industrial year"
+    - "industrial placement"
     - "year in industry"
     - sandwich
+    - "sandwich year"
+    - "sandwich placement"
+    - "sandwich student"
+    - "thick sandwich"
+    - "year out"
+    - "gap year placement"
     - undergraduate
     - co-op
     - "12 month"
     - "12-month"
+    - "13 month"
+    - "13-month"
+    - "44 week"
+    - "44-week"
     - apprentice
     - "early careers"
     - "student"

@@ -133,14 +133,18 @@ def _kw_match(keyword, title):
 
 
 def title_filter(jobs, cfg):
-    """Keep a job iff its title has >=1 positive keyword and 0 negative keywords."""
+    """Keep a job iff its title has >=1 role keyword (if configured), >=1
+    positive/framing keyword, and 0 negative keywords."""
     filt = cfg.get("title_filter", {})
+    role_keywords = [r.lower() for r in filt.get("role_keywords", [])]
     positive = [p.lower() for p in filt.get("positive", [])]
     negative = [n.lower() for n in filt.get("negative", [])]
 
     kept = []
     for job in jobs:
         title = job.get("title", "").lower()
+        if role_keywords and not any(_kw_match(r, title) for r in role_keywords):
+            continue
         if not any(_kw_match(p, title) for p in positive):
             continue
         if any(_kw_match(n, title) for n in negative):
