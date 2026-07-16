@@ -1,4 +1,10 @@
 {
+  "https://apply.workable.com/j/A150699345": {
+    "company": "Starling Bank",
+    "first_seen": "2026-07-16",
+    "score": 56,
+    "title": "Information Security Analyst - Cyber Threat Intelligence - 12 month FTC"
+  },
   "https://boards.greenhouse.io/cloudflare/jobs/8013562?gh_jid=8013562": {
     "company": "Cloudflare",
     "first_seen": "2026-07-15",
@@ -29,11 +35,41 @@
     "score": 56,
     "title": "Security Engineer Intern (Fall 2026)"
   },
+  "https://job-boards.greenhouse.io/canonical/jobs/7785136": {
+    "company": "Canonical",
+    "first_seen": "2026-07-16",
+    "score": 56,
+    "title": "Software Engineer, Automotive and Industrial Architecture"
+  },
   "https://job-boards.greenhouse.io/gocardless/jobs/7916619": {
     "company": "GoCardless",
     "first_seen": "2026-07-15",
     "score": 46,
     "title": "Data Analyst (12 month FTC)"
+  },
+  "https://jobs.ashbyhq.com/freetrade/f44c9df8-ec02-4fde-a75e-ad0f220147cd": {
+    "company": "Freetrade",
+    "first_seen": "2026-07-16",
+    "score": 66,
+    "title": "Security Engineer Intern"
+  },
+  "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b": {
+    "company": "Snowflake",
+    "first_seen": "2026-07-16",
+    "score": 62,
+    "title": "Software Engineer Intern - Zurich (2026)"
+  },
+  "https://jobs.ashbyhq.com/snowflake/41e65c6c-a01e-4f40-af14-ae75d3b95e27": {
+    "company": "Snowflake",
+    "first_seen": "2026-07-16",
+    "score": 56,
+    "title": "Software Engineer Intern - Berlin (2026)"
+  },
+  "https://jobs.ashbyhq.com/snowflake/897e1850-c590-4462-b187-0516b65b2034": {
+    "company": "Snowflake",
+    "first_seen": "2026-07-16",
+    "score": 62,
+    "title": "Software Engineer Intern (AI/ML) - 2026"
   },
   "https://jobs.lever.co/palantir/09846827-b931-4a9f-bd64-c3bb8860187b": {
     "company": "Palantir",
@@ -226,5 +262,35 @@
     "first_seen": "2026-07-15",
     "score": 56,
     "title": "Software Engineer, Internship - Infrastructure"
+  },
+  "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Mexico-City-Mexico/Data-Analyst-Internship_R65547": {
+    "company": "Motorola Solutions",
+    "first_seen": "2026-07-16",
+    "score": 50,
+    "title": "Data Analyst Internship"
+  },
+  "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Ontario-Remote-Work/Data-Analyst-Co-Op_R65918": {
+    "company": "Motorola Solutions",
+    "first_seen": "2026-07-16",
+    "score": 40,
+    "title": "Data Analyst Co-Op"
+  },
+  "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Ontario-Remote-Work/Data-Engineering-Co-Op_R65916": {
+    "company": "Motorola Solutions",
+    "first_seen": "2026-07-16",
+    "score": 40,
+    "title": "Data Engineering Co-Op"
+  },
+  "https://www.adzuna.co.uk/jobs/details/5776436325?utm_medium=api&utm_source=aac03520": {
+    "company": "Vertiv Group",
+    "first_seen": "2026-07-16",
+    "score": 50,
+    "title": "Placement Student - Software Engineering"
+  },
+  "https://www.adzuna.co.uk/jobs/details/5785366029?utm_medium=api&utm_source=aac03520": {
+    "company": "Alpine Racing",
+    "first_seen": "2026-07-16",
+    "score": 60,
+    "title": "Software Engineering Student Placement"
   }
 }
