@@ -33,7 +33,9 @@ LONG_DURATION_KEYWORDS = [
 # hybrid, or remote) — not limited to London/Kent, so any UK location scores
 # the same rather than favoring specific cities.
 UK_LOCATION_KEYWORDS = [
-    "united kingdom", "uk", "london", "kent", "canterbury", "remote",
+    # ponytail: bare "remote" deliberately excluded — it's not a UK signal on
+    # its own ("Ontario Remote Work" isn't UK just because it says remote).
+    "united kingdom", "uk", "london", "kent", "canterbury",
     "manchester", "birmingham", "edinburgh", "glasgow", "bristol", "leeds",
     "liverpool", "sheffield", "newcastle", "cardiff", "belfast",
     "nottingham", "cambridge", "oxford", "reading", "southampton", "brighton",

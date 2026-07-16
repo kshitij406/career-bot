@@ -5,9 +5,10 @@ Run as: python -m src.run
 
 import yaml
 
+from src.aggregators import fetch_adzuna_jobs, fetch_reed_jobs
 from src.gmail_scan import scan_gmail_alerts
 from src.notify import notify
-from src.scan import scan_all, title_filter
+from src.scan import dedupe_jobs, scan_all, title_filter
 from src.score import score_jobs
 from src.seen import is_new, load_seen, record, save_seen
 
@@ -19,15 +20,28 @@ def load_config():
         portals = yaml.safe_load(f)
     with open("config/gmail.yml", "r", encoding="utf-8") as f:
         gmail_cfg = yaml.safe_load(f)
+    with open("config/aggregators.yml", "r", encoding="utf-8") as f:
+        aggregators_cfg = yaml.safe_load(f)
     with open("cv.md", "r", encoding="utf-8") as f:
         cv_text = f.read()
-    return profile, portals, gmail_cfg, cv_text
+    return profile, portals, gmail_cfg, aggregators_cfg, cv_text
 
 
 def main():
-    profile, portals, gmail_cfg, cv_text = load_config()
+    profile, portals, gmail_cfg, aggregators_cfg, cv_text = load_config()
 
-    scanned = scan_all(portals) + scan_gmail_alerts(gmail_cfg)
+    keywords = aggregators_cfg.get("keywords", "software engineer placement")
+    location = aggregators_cfg.get("location", "UK")
+
+    # ATS/Gmail sources listed first so dedupe_jobs prefers them over an
+    # aggregator's copy of the same posting.
+    scanned = (
+        scan_all(portals)
+        + scan_gmail_alerts(gmail_cfg)
+        + fetch_reed_jobs(keywords, location)
+        + fetch_adzuna_jobs(keywords, location)
+    )
+    scanned = dedupe_jobs(scanned)
     filtered = title_filter(scanned, portals)
 
     seen = load_seen()

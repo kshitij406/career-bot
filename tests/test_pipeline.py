@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.scan import title_filter
+from src.scan import dedupe_jobs, title_filter
 from src.seen import is_new
 from src.score import score_jobs
 from src.gmail_scan import parse_linkedin_alert, parse_indeed_alert
@@ -50,6 +50,31 @@ def test_title_filter():
     assert "Software Engineering Intern" in kept_titles
     assert "Senior Staff Engineer" not in kept_titles
     assert len(kept) == 2
+
+
+def test_dedupe_jobs_collapses_cross_source_duplicate():
+    ats_job = {
+        "title": "Software Engineer Industrial Placement",
+        "company": "Monzo",
+        "url": "https://job-boards.greenhouse.io/monzo/jobs/1001",
+        "location": "London, UK",
+    }
+    reed_copy = {
+        "title": "Software Engineer Industrial Placement",
+        "company": "Monzo",
+        "url": "https://www.reed.co.uk/jobs/software-engineer-industrial-placement/9999999",
+        "location": "London",
+        "source": "reed",
+    }
+    unrelated = {
+        "title": "Data Analyst Placement",
+        "company": "Ocado Group",
+        "url": "https://job-boards.greenhouse.io/ocadogroup/jobs/2002",
+        "location": "Hatfield, UK",
+    }
+    deduped = dedupe_jobs([ats_job, reed_copy, unrelated])
+    assert len(deduped) == 2
+    assert deduped[0]["url"] == ats_job["url"], "ATS-sourced copy must win over the aggregator duplicate"
 
 
 def test_dedup():
@@ -198,6 +223,8 @@ def test_notify_survives_discord_failure():
 if __name__ == "__main__":
     test_title_filter()
     print("test_title_filter passed")
+    test_dedupe_jobs_collapses_cross_source_duplicate()
+    print("test_dedupe_jobs_collapses_cross_source_duplicate passed")
     test_dedup()
     print("test_dedup passed")
     test_heuristic_scoring_needs_no_network()

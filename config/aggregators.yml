@@ -1,0 +1,9 @@
+# Aggregator search config — consumed by src/aggregators.py.
+#
+# Reed and Adzuna search across many employers by keyword, unlike the
+# per-company ATS scanners in config/portals.yml. Both are official, key-based
+# public APIs (REED_API_KEY, ADZUNA_APP_ID, ADZUNA_API_KEY env vars) — not
+# scraping. Results pass through the same title_filter in config/portals.yml
+# and get deduped against ATS-sourced postings before scoring.
+keywords: "software engineer placement"
+location: "UK"

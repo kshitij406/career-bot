@@ -1,12 +1,28 @@
 # Portal scanner configuration — consumed by src/scan.py.
 #
-# Only public ATS APIs (Greenhouse / Ashby / Lever). No Indeed, no LinkedIn — ever.
-# Provider is auto-detected from careers_url:
-#   greenhouse:  job-boards(.eu)?.greenhouse.io/<slug>  -> boards-api.greenhouse.io/v1/boards/<slug>/jobs
-#   ashby:       jobs.ashbyhq.com/<slug>                -> api.ashbyhq.com/posting-api/job-board/<slug>
-#   lever:       jobs.lever.co/<slug>                   -> api.lever.co/v0/postings/<slug>
+# Only public ATS JSON/XML APIs. No Indeed, no LinkedIn — ever. Provider is
+# auto-detected from careers_url:
+#   greenhouse:       job-boards(.eu)?.greenhouse.io/<slug>   -> boards-api.greenhouse.io/v1/boards/<slug>/jobs
+#   ashby:            jobs.ashbyhq.com/<slug>                 -> api.ashbyhq.com/posting-api/job-board/<slug>
+#   lever:            jobs.lever.co/<slug>                    -> api.lever.co/v0/postings/<slug>
+#   smartrecruiters:  careers.smartrecruiters.com/<slug>      -> api.smartrecruiters.com/v1/companies/<slug>/postings
+#   workable:         apply.workable.com/<slug>                -> apply.workable.com/api/v1/widget/accounts/<slug>
+#   personio:         <slug>.jobs.personio.(com|de)           -> <slug>.jobs.personio.(com|de)/xml
+#   workday:          <tenant>.<wdN>.myworkdayjobs.com/<site>  -> <tenant>.<wdN>.myworkdayjobs.com/wday/cxs/<tenant>/<site>/jobs
+#                     (workday's own embedded job-search widget calls this same JSON endpoint;
+#                     stable and unauthenticated, but not officially documented the way the others are)
+#   recruitee:        <slug>.recruitee.com                     -> <slug>.recruitee.com/api/offers
+#                     (custom-domain Recruitee boards are also auto-detected: if a careers_url
+#                     doesn't match any pattern above, src/scan.py probes <domain>/api/offers
+#                     and treats it as Recruitee if the response has an "offers" key)
+#   breezy:           <slug>.breezy.hr                         -> <slug>.breezy.hr/json?verbose=true
+#                     (verbose=true is mandatory — without it postings have no description)
 #
-# All slugs below were verified live on 2026-07-15.
+# Evaluated and excluded: Teamtailor and Comeet/Spark Hire Recruit both
+# require an employer-issued key/token that isn't derivable from careers_url
+# alone, breaking the auto-detect model above.
+#
+# All slugs below were verified live on 2026-07-15/16.
 
 # Keyword pre-filter applied BEFORE scoring (src/score.py).
 # A title must match >=1 role keyword, >=1 positive/framing keyword, and 0
@@ -113,6 +129,8 @@ companies:
     careers_url: https://job-boards.greenhouse.io/sumup
   - name: GitLab
     careers_url: https://job-boards.greenhouse.io/gitlab
+  - name: Butternut Box
+    careers_url: https://job-boards.greenhouse.io/butternutbox
 
   # -- UK AI / deep tech --
   - name: Speechmatics
@@ -131,6 +149,28 @@ companies:
     careers_url: https://job-boards.greenhouse.io/stabilityai
   - name: Helsing
     careers_url: https://job-boards.greenhouse.io/helsing
+
+  # -- Dev tools / infra (global, verified UK-located openings) --
+  - name: Datadog
+    careers_url: https://job-boards.greenhouse.io/datadog
+  - name: Elastic
+    careers_url: https://job-boards.greenhouse.io/elastic
+  - name: MongoDB
+    careers_url: https://job-boards.greenhouse.io/mongodb
+  - name: Twilio
+    careers_url: https://job-boards.greenhouse.io/twilio
+  - name: CircleCI
+    careers_url: https://job-boards.greenhouse.io/circleci
+  - name: PagerDuty
+    careers_url: https://job-boards.greenhouse.io/pagerduty
+  - name: Cockroach Labs
+    careers_url: https://job-boards.greenhouse.io/cockroachlabs
+  - name: Canonical
+    careers_url: https://job-boards.greenhouse.io/canonical
+
+  # -- Quant / fintech (global, UK office) --
+  - name: Jane Street
+    careers_url: https://job-boards.greenhouse.io/janestreet
 
   # -- Ashby-based --
   - name: ElevenLabs
@@ -151,6 +191,14 @@ companies:
     careers_url: https://jobs.ashbyhq.com/lendable
   - name: Paddle
     careers_url: https://jobs.ashbyhq.com/paddle
+  - name: Codat
+    careers_url: https://jobs.ashbyhq.com/codat
+  - name: Freetrade
+    careers_url: https://jobs.ashbyhq.com/freetrade
+  - name: Improbable
+    careers_url: https://jobs.ashbyhq.com/improbable
+  - name: Snowflake
+    careers_url: https://jobs.ashbyhq.com/snowflake
 
   # -- Lever-based --
   - name: Palantir
@@ -167,3 +215,45 @@ companies:
     careers_url: https://job-boards.greenhouse.io/intercom
   - name: Vercel
     careers_url: https://job-boards.greenhouse.io/vercel
+
+  # -- SmartRecruiters-based --
+  - name: Visa
+    careers_url: https://careers.smartrecruiters.com/Visa
+
+  # -- Workable-based (UK-headquartered) --
+  - name: Starling Bank
+    careers_url: https://apply.workable.com/starling-bank
+  - name: Zego
+    careers_url: https://apply.workable.com/zego
+  - name: Fuse Energy
+    careers_url: https://apply.workable.com/fuseenergy
+  - name: Tomoro
+    careers_url: https://apply.workable.com/tomoro-ai
+
+  # -- Personio-based (UK-headquartered) --
+  - name: Intigriti
+    careers_url: https://intigriti.jobs.personio.com
+
+  # -- Workday-based (global, verified UK-located openings) --
+  - name: Motorola Solutions
+    careers_url: https://motorolasolutions.wd5.myworkdayjobs.com/en-US/Careers
+  - name: Mastercard
+    careers_url: https://mastercard.wd1.myworkdayjobs.com/en-US/CorporateCareers
+  - name: Unum
+    careers_url: https://unum.wd1.myworkdayjobs.com/en-US/external
+  - name: Pacific Life (UnderwriteMe)
+    careers_url: https://pacificlife.wd1.myworkdayjobs.com/UnderwriteMeCareers
+
+  # -- Recruitee-based (UK-headquartered) --
+  - name: BCN Group
+    careers_url: https://bcngroup.recruitee.com
+  - name: Equals Money
+    careers_url: https://equalsmoney.recruitee.com
+  - name: The Config Team
+    careers_url: https://theconfigteamcareers.recruitee.com
+
+  # -- Breezy HR-based (UK-headquartered) --
+  - name: Reincubate
+    careers_url: https://reincubate.breezy.hr
+  - name: Quantios
+    careers_url: https://quantios.breezy.hr
