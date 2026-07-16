@@ -77,6 +77,51 @@ def test_dedupe_jobs_collapses_cross_source_duplicate():
     assert deduped[0]["url"] == ats_job["url"], "ATS-sourced copy must win over the aggregator duplicate"
 
 
+def test_dedupe_jobs_keeps_same_company_same_title_different_office():
+    # Real data from the 2026-07-16 live audit: Monzo posts "Engineering
+    # Manager" separately in Barcelona and in Cardiff/London/Remote — two
+    # genuinely different open reqs that a location-blind (title, company)
+    # key was wrongly collapsing.
+    barcelona = {
+        "title": "Engineering Manager",
+        "company": "Monzo",
+        "url": "https://job-boards.greenhouse.io/monzo/jobs/6945371",
+        "location": "Barcelona",
+    }
+    cardiff_london_remote = {
+        "title": "Engineering Manager",
+        "company": "Monzo",
+        "url": "https://job-boards.greenhouse.io/monzo/jobs/5018066",
+        "location": "Cardiff, London or Remote (UK)",
+    }
+    deduped = dedupe_jobs([barcelona, cardiff_london_remote])
+    assert len(deduped) == 2, "different real offices for the same title must not collapse"
+
+
+def test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text():
+    # Real data from the same audit: AJ Bell "Software Engineer" posted
+    # independently to Reed and Adzuna. Reed's location is a bare postcode
+    # ("M53EE"), Adzuna's is a city name ("Manchester, Greater Manchester") —
+    # incompatible text with no cheap way to reconcile, so cross-source
+    # matches must still collapse on (title, company) alone.
+    reed_posting = {
+        "title": "Software Engineer",
+        "company": "AJ Bell",
+        "url": "https://www.reed.co.uk/jobs/software-engineer/57122279",
+        "location": "M53EE",
+        "source": "reed",
+    }
+    adzuna_posting = {
+        "title": "Software Engineer",
+        "company": "AJ Bell",
+        "url": "https://www.adzuna.co.uk/jobs/land/ad/5801491743",
+        "location": "Manchester, Greater Manchester",
+        "source": "adzuna",
+    }
+    deduped = dedupe_jobs([reed_posting, adzuna_posting])
+    assert len(deduped) == 1, "same job across sources must still collapse despite postcode vs city name"
+
+
 def test_dedup():
     jobs = load_fixtures()
     job1, job2, job3 = jobs
@@ -225,6 +270,10 @@ if __name__ == "__main__":
     print("test_title_filter passed")
     test_dedupe_jobs_collapses_cross_source_duplicate()
     print("test_dedupe_jobs_collapses_cross_source_duplicate passed")
+    test_dedupe_jobs_keeps_same_company_same_title_different_office()
+    print("test_dedupe_jobs_keeps_same_company_same_title_different_office passed")
+    test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text()
+    print("test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text passed")
     test_dedup()
     print("test_dedup passed")
     test_heuristic_scoring_needs_no_network()

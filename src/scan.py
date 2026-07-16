@@ -409,17 +409,96 @@ def title_filter(jobs, cfg):
     return kept
 
 
+_PARENTHETICAL_RE = re.compile(r"\(.*?\)")
+_REMOTE_ONLY_RE = re.compile(r"^(fully\s+)?remote$")
+_UK_COUNTRY_SUFFIX_RE = re.compile(r",\s*(uk|united kingdom|gb|great britain)\s*$")
+_LOCATION_ALIASES = {
+    "greater manchester": "manchester",
+    "greater london": "london",
+}
+
+
+def _normalize_location(location):
+    """case-insensitive, trimmed; strips a UK country suffix ("Manchester,
+    UK" -> "manchester") and known city aliases ("Greater Manchester" ->
+    "manchester"); collapses any bare-remote phrasing ("Remote", "Remote
+    (UK)", "Fully Remote") to one canonical "remote" token, since those
+    describe the same non-office reality regardless of exact wording."""
+    loc = (location or "").strip().lower()
+    if not loc:
+        return ""
+    loc = _PARENTHETICAL_RE.sub("", loc).strip()
+    loc = re.sub(r"\s+", " ", loc)
+    if _REMOTE_ONLY_RE.fullmatch(loc):
+        return "remote"
+    loc = _UK_COUNTRY_SUFFIX_RE.sub("", loc).strip()
+    return _LOCATION_ALIASES.get(loc, loc)
+
+
 def dedupe_jobs(jobs):
-    """Collapse cross-source duplicates (e.g. the same Greenhouse posting
-    showing up again via Reed/Adzuna aggregation), keyed on normalized
-    (title, company). First occurrence wins, so callers should list
-    ATS/Gmail sources before aggregator sources."""
-    seen_keys = set()
+    """Collapse duplicate postings, keyed on normalized (title, company) plus
+    location — but location is only compared *within* the same source.
+
+    Audited on a live run (2026-07-16): the measured false positives were all
+    a single ATS company posting the same title in genuinely different
+    offices (Monzo "Engineering Manager" in Barcelona vs Cardiff/London/
+    Remote; GoCardless "Data Science Manager" in Riga/London/Lisbon) — same
+    source, different real postings, wrongly collapsed by a location-blind
+    key. Requiring a location match within a source fixes that.
+
+    The one confirmed-working cross-source collapse from that same run (AJ
+    Bell "Software Engineer", posted independently to Reed and Adzuna) has
+    incompatible location text between sources — Reed returned the bare
+    postcode "M53EE", Adzuna returned "Manchester, Greater Manchester" — with
+    no cheap, maintainable way to reconcile a postcode against a city name
+    (would need a postcode-to-place lookup table). So cross-source matches
+    fall back to (title, company) alone, same as before this fix: two
+    different sources reporting the same title at the same company are
+    treated as the same real job regardless of how each formats location.
+
+    Cross-source collapses that couldn't check location agreement are logged
+    (not blocked) so it's possible to audit them periodically as more
+    companies turn up on multiple sources — see the comment on that branch.
+
+    First occurrence wins, so callers should list ATS/Gmail sources before
+    aggregator sources.
+    """
+    seen_sources_by_key = {}  # (title, company) -> {source: {normalized_location: raw_location}}
     kept = []
     for job in jobs:
-        key = (job.get("title", "").strip().lower(), job.get("company", "").strip().lower())
-        if key in seen_keys:
-            continue
-        seen_keys.add(key)
+        title = job.get("title", "").strip().lower()
+        company = job.get("company", "").strip().lower()
+        source = job.get("source", "ats")
+        raw_location = job.get("location", "")
+        location = _normalize_location(raw_location)
+        base_key = (title, company)
+
+        locations_by_source = seen_sources_by_key.setdefault(base_key, {})
+
+        if source in locations_by_source:
+            if location in locations_by_source[source]:
+                continue  # same source, same (normalized) location -> duplicate
+        elif locations_by_source:
+            # ACCEPTED RISK, not a solved case: we cannot check location
+            # agreement here. Reed returns bare postcodes ("M53EE"), Adzuna
+            # returns city names ("Manchester, Greater Manchester") — the
+            # same real office, but with no cheap/maintainable way to
+            # reconcile a postcode against a place name (would need a
+            # postcode-to-place lookup table). So a genuinely different req
+            # in a different city, picked up by two different sources,
+            # *will* incorrectly collapse here, exactly the failure mode
+            # just fixed for same-source — this branch has no structural
+            # fix, only the log line below for visibility.
+            other_source, other_locations = next(iter(locations_by_source.items()))
+            other_raw_location = next(iter(other_locations.values()))
+            print(
+                "info: dedupe_jobs collapsed cross-source with no location agreement: "
+                f"{job.get('title', '')!r} @ {job.get('company', '')!r} "
+                f"[{source} loc={raw_location!r}] vs [{other_source} loc={other_raw_location!r}]",
+                file=sys.stderr,
+            )
+            continue  # a different source already reported this title+company -> treated as same real job
+
+        locations_by_source.setdefault(source, {})[location] = raw_location
         kept.append(job)
     return kept
