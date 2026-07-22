@@ -15,7 +15,7 @@ import urllib.request
 
 import yaml
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+from src.score import _is_openrouter, _resolve_api_base
 
 TAILOR_PROMPT = """You are tailoring a candidate's CV to a specific job description.
 
@@ -53,34 +53,46 @@ def _find_browser():
     return None
 
 
-def _model():
+def _scoring_cfg():
     try:
         with open("config/profile.yml", "r", encoding="utf-8") as f:
-            profile = yaml.safe_load(f)
-        return profile.get("scoring", {}).get("model", "openai/gpt-oss-20b:free")
+            return (yaml.safe_load(f) or {}).get("scoring", {})
     except FileNotFoundError:
-        return "openai/gpt-oss-20b:free"
+        return {}
 
 
 def tailor_cv(cv_text, jd_text):
+    scoring_cfg = _scoring_cfg()
+    api_base = _resolve_api_base(scoring_cfg)
+    # Tailoring is the iteration-heavy path — same JD reworked several times —
+    # so it's the one that benefits most from pointing at a local model.
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if _is_openrouter(api_base) and not api_key:
+        raise SystemExit(
+            "OPENROUTER_API_KEY is not set. Either export it, or point "
+            "scoring.api_base (or $CAREER_BOT_API_BASE) at a local "
+            "OpenAI-compatible server such as http://localhost:11434/v1"
+        )
+
     body = json.dumps(
         {
-            "model": _model(),
+            "model": scoring_cfg.get("model", "openai/gpt-oss-20b:free"),
             "messages": [
                 {"role": "user", "content": TAILOR_PROMPT.format(cv=cv_text, jd=jd_text)}
             ],
             "max_tokens": 4096,
         }
     ).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    if _is_openrouter(api_base):
+        headers["HTTP-Referer"] = "https://github.com/career-bot"
+        headers["X-Title"] = "career-bot"
     req = urllib.request.Request(
-        OPENROUTER_URL,
+        f"{api_base}/chat/completions",
         data=body,
-        headers={
-            "Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/career-bot",
-            "X-Title": "career-bot",
-        },
+        headers=headers,
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=120) as resp:

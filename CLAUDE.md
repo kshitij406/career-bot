@@ -9,7 +9,7 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - Nothing gets submitted anywhere automatically. The bot notifies and scores; the owner decides and acts.
 - Discord notification only for jobs at or above the score threshold in `config/profile.yml`.
 - `src/tailor.py` and PDF generation are manual-only, never on cron — `src/run.py` and the workflow must never invoke them. Same rule for `src/gmail_auth_setup.py` (one-time OAuth consent).
-- CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), openrouter.ai (scoring/tailoring, routed to whatever model `config/profile.yml` picks), and the owner's Discord webhook. No telemetry.
+- CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
 - Generated content must never fabricate experience or metrics, and must never reference any personal relationship.
 
 ## Architecture

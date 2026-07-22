@@ -35,5 +35,15 @@ scoring:
   # https://openrouter.ai/models?max_price=0 (the list changes over time).
   # Free models are also capped at 50 requests/day per OpenRouter account.
   model: openai/gpt-oss-20b:free
+  # Any endpoint speaking the OpenAI chat-completions shape. Point this at a
+  # local server to escape OpenRouter's free-tier caps entirely:
+  #   Ollama     http://localhost:11434/v1   (model: e.g. qwen2.5:7b)
+  #   LM Studio  http://localhost:1234/v1
+  #   llama.cpp  http://localhost:8080/v1
+  # No API key is sent when the base isn't OpenRouter, and the free-tier
+  # request delay is skipped since a local model has no rate limit. Override
+  # per-run without editing this file by exporting CAREER_BOT_API_BASE.
+  # Leave as-is for the GitHub Actions cron, which has no local model.
+  api_base: https://openrouter.ai/api/v1
   # Jobs scoring >= threshold (0-100) trigger a Discord notification.
   threshold: 60

@@ -76,6 +76,48 @@ def test_html_to_text_handles_escaped_markup():
     assert "200ms" in _html_to_text("latency &lt; 200ms")
 
 
+def test_api_base_is_configurable_and_local_needs_no_key():
+    import urllib.request as urllib_request_module
+    from src.score import _resolve_api_base, _is_openrouter
+
+    assert _resolve_api_base({}) == "https://openrouter.ai/api/v1"
+    assert _resolve_api_base({"api_base": "http://localhost:11434/v1/"}) == "http://localhost:11434/v1"
+    os.environ["CAREER_BOT_API_BASE"] = "http://localhost:1234/v1"
+    try:
+        # env wins over profile.yml, so a local run can redirect scoring
+        # without editing committed config
+        assert _resolve_api_base({"api_base": "https://openrouter.ai/api/v1"}) == "http://localhost:1234/v1"
+    finally:
+        os.environ.pop("CAREER_BOT_API_BASE", None)
+    assert _is_openrouter("https://openrouter.ai/api/v1")
+    assert not _is_openrouter("http://localhost:11434/v1")
+
+    captured = {}
+
+    def fake_urlopen(req, timeout=60):
+        captured["url"] = req.full_url
+        captured["auth"] = req.headers.get("Authorization")
+        captured["referer"] = req.headers.get("Http-referer")
+        return _FakeHTTPResponse(None)
+
+    original = urllib_request_module.urlopen
+    urllib_request_module.urlopen = fake_urlopen
+    os.environ.pop("OPENROUTER_API_KEY", None)
+    try:
+        local_profile = dict(AI_PROFILE)
+        local_profile["scoring"] = dict(AI_PROFILE["scoring"], api_base="http://localhost:11434/v1")
+        scored = score_jobs(load_fixtures()[:1], local_profile, "fake cv text")
+    finally:
+        urllib_request_module.urlopen = original
+
+    # ai_enabled must not silently no-op against a local server just because
+    # OPENROUTER_API_KEY is unset — that key is meaningless to localhost.
+    assert scored[0]["score"] == 85
+    assert captured["url"] == "http://localhost:11434/v1/chat/completions"
+    assert captured["auth"] is None, "no key exists, so no Authorization header"
+    assert captured["referer"] is None, "OpenRouter-specific headers must not go to a local server"
+
+
 def test_dedupe_jobs_collapses_cross_source_duplicate():
     ats_job = {
         "title": "Software Engineer Industrial Placement",
@@ -292,6 +334,8 @@ def test_notify_survives_discord_failure():
 if __name__ == "__main__":
     test_title_filter()
     print("test_title_filter passed")
+    test_api_base_is_configurable_and_local_needs_no_key()
+    print("test_api_base_is_configurable_and_local_needs_no_key passed")
     test_html_to_text_handles_escaped_markup()
     print("test_html_to_text_handles_escaped_markup passed")
     test_dedupe_jobs_collapses_cross_source_duplicate()

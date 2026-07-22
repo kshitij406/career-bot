@@ -16,7 +16,23 @@ import sys
 import time
 import urllib.request
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_API_BASE = "https://openrouter.ai/api/v1"
+
+# Any endpoint speaking the OpenAI chat-completions shape works here: Ollama's
+# compat endpoint (http://localhost:11434/v1), LM Studio, llama.cpp's server,
+# vLLM, or OpenRouter itself. Resolution order is env var, then profile.yml,
+# then the OpenRouter default — so a local run can redirect scoring without
+# editing committed config.
+API_BASE_ENV = "CAREER_BOT_API_BASE"
+
+
+def _resolve_api_base(scoring_cfg):
+    base = os.environ.get(API_BASE_ENV) or scoring_cfg.get("api_base") or DEFAULT_API_BASE
+    return base.rstrip("/")
+
+
+def _is_openrouter(api_base):
+    return "openrouter.ai" in api_base
 
 DURATION_KEYWORDS = [
     "year in industry", "placement", "sandwich", "industrial", "internship",
@@ -164,7 +180,7 @@ def _extract_json(text):
     return json.loads(text)
 
 
-def _call_openrouter(model, api_key, system_prompt, user_message):
+def _call_chat_completions(api_base, model, api_key, system_prompt, user_message):
     body = json.dumps(
         {
             "model": model,
@@ -173,20 +189,23 @@ def _call_openrouter(model, api_key, system_prompt, user_message):
                 {"role": "user", "content": user_message},
             ],
             "max_tokens": 1024,
-            # Best-effort: honored by many but not all OpenRouter providers.
-            # The system-prompt instruction + _extract_json fallback cover the rest.
+            # Best-effort: honored by many but not all providers. The
+            # system-prompt instruction + _extract_json fallback cover the rest.
             "response_format": {"type": "json_object"},
         }
     ).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
+    # A local server needs no credential and rejects nothing for lacking one,
+    # so only send Authorization when there's actually a key.
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    if _is_openrouter(api_base):
+        headers["HTTP-Referer"] = "https://github.com/career-bot"
+        headers["X-Title"] = "career-bot"
     req = urllib.request.Request(
-        OPENROUTER_URL,
+        f"{api_base}/chat/completions",
         data=body,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/career-bot",
-            "X-Title": "career-bot",
-        },
+        headers=headers,
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=60) as resp:
@@ -198,8 +217,13 @@ def score_jobs(jobs, profile, cv_text):
     """Score each job in place (returns a new list). Rule-based by default;
     AI refines it on top when scoring.ai_enabled is true and a key is set."""
     scoring_cfg = profile.get("scoring", {})
+    api_base = _resolve_api_base(scoring_cfg)
     api_key = os.environ.get("OPENROUTER_API_KEY")
-    use_ai = scoring_cfg.get("ai_enabled", False) and bool(api_key)
+    # OpenRouter needs a key; a local server does not. Requiring one regardless
+    # would make ai_enabled silently a no-op against localhost.
+    use_ai = scoring_cfg.get("ai_enabled", False) and (
+        bool(api_key) or not _is_openrouter(api_base)
+    )
 
     model = scoring_cfg.get("model", "openai/gpt-oss-20b:free")
     system_prompt = build_system_prompt(profile, cv_text) if use_ai else None
@@ -210,12 +234,15 @@ def score_jobs(jobs, profile, cv_text):
         score, reason, role_type = _heuristic_score(job)
 
         if use_ai:
-            if i > 0 and model.endswith(":free"):
+            if i > 0 and model.endswith(":free") and _is_openrouter(api_base):
                 # ponytail: free-tier OpenRouter models cap at ~20 req/min; a
-                # flat delay is the simplest way to stay under that.
+                # flat delay is the simplest way to stay under that. A local
+                # model has no such cap, so don't pay the delay there.
                 time.sleep(3)
             try:
-                text = _call_openrouter(model, api_key, system_prompt, _job_user_message(job))
+                text = _call_chat_completions(
+                    api_base, model, api_key, system_prompt, _job_user_message(job)
+                )
                 data = _extract_json(text)
                 score, reason, role_type = data["score"], data["reason"], data["role_type"]
             except Exception as e:  # noqa: BLE001 - AI is optional, never a blocker
