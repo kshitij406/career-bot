@@ -257,3 +257,142 @@ companies:
     careers_url: https://reincubate.breezy.hr
   - name: Quantios
     careers_url: https://quantios.breezy.hr
+
+  # ==================================================================
+  # Expansion batch — all slugs below verified live on 2026-07-22 by
+  # probing each provider's API directly and requiring a non-empty
+  # posting list. Slugs that 404'd or returned zero postings were
+  # dropped rather than guessed at.
+  # ==================================================================
+
+  # -- UK fintech / banking --
+  - name: Wise
+    careers_url: https://careers.smartrecruiters.com/wise
+  - name: Tide
+    careers_url: https://job-boards.greenhouse.io/tide
+  - name: ClearBank
+    careers_url: https://jobs.ashbyhq.com/clearbank
+  - name: Marshmallow
+    careers_url: https://jobs.ashbyhq.com/marshmallow
+  - name: TrueLayer
+    careers_url: https://job-boards.greenhouse.io/truelayer
+  - name: Form3
+    careers_url: https://job-boards.greenhouse.io/form3
+  - name: Griffin
+    careers_url: https://jobs.ashbyhq.com/griffin
+  - name: Modulr
+    careers_url: https://job-boards.greenhouse.io/modulrfinance
+  - name: Primer
+    careers_url: https://jobs.ashbyhq.com/primer
+  - name: Yapily
+    careers_url: https://apply.workable.com/yapily
+  - name: Cleo
+    careers_url: https://job-boards.greenhouse.io/cleo
+  - name: Plum
+    careers_url: https://apply.workable.com/withplum
+  - name: Zilch
+    careers_url: https://jobs.ashbyhq.com/zilch
+  - name: 10x Banking
+    careers_url: https://apply.workable.com/10xbanking
+  - name: Trustly
+    careers_url: https://jobs.ashbyhq.com/trustly
+  - name: Ravio
+    careers_url: https://jobs.ashbyhq.com/ravio
+
+  # -- Trading / quant (heavy UK placement + internship hirers) --
+  - name: IMC Trading
+    careers_url: https://job-boards.greenhouse.io/imc
+  - name: Squarepoint Capital
+    careers_url: https://job-boards.greenhouse.io/squarepointcapital
+  - name: Man Group
+    careers_url: https://job-boards.greenhouse.io/mangroup
+  - name: Marshall Wace
+    careers_url: https://job-boards.greenhouse.io/marshallwace
+
+  # -- UK consumer / marketplace --
+  - name: Deliveroo
+    careers_url: https://jobs.ashbyhq.com/deliveroo
+  - name: ASOS
+    careers_url: https://careers.smartrecruiters.com/asos
+  - name: Auto Trader
+    careers_url: https://job-boards.greenhouse.io/autotrader
+  - name: Houseful (Zoopla)
+    careers_url: https://apply.workable.com/houseful
+  - name: Motorway
+    careers_url: https://jobs.ashbyhq.com/motorway
+  - name: Lyst
+    careers_url: https://apply.workable.com/lyst
+  - name: Cognism
+    careers_url: https://job-boards.greenhouse.io/cognism
+
+  # -- Dev tools / infrastructure --
+  - name: Databricks
+    careers_url: https://job-boards.greenhouse.io/databricks
+  - name: Confluent
+    careers_url: https://jobs.ashbyhq.com/confluent
+  - name: Grafana Labs
+    careers_url: https://job-boards.greenhouse.io/grafanalabs
+  - name: PostHog
+    careers_url: https://jobs.ashbyhq.com/posthog
+  - name: Supabase
+    careers_url: https://jobs.ashbyhq.com/supabase
+  - name: Algolia
+    careers_url: https://job-boards.greenhouse.io/algolia
+  - name: Contentful
+    careers_url: https://job-boards.greenhouse.io/contentful
+  - name: Sanity
+    careers_url: https://jobs.ashbyhq.com/sanity
+  - name: Airtable
+    careers_url: https://job-boards.greenhouse.io/airtable
+  - name: Figma
+    careers_url: https://job-boards.greenhouse.io/figma
+  - name: Miro
+    careers_url: https://jobs.ashbyhq.com/miro
+  - name: Typeform
+    careers_url: https://job-boards.greenhouse.io/typeform
+  - name: Pipedrive
+    careers_url: https://jobs.lever.co/pipedrive
+  - name: Matillion
+    careers_url: https://jobs.lever.co/matillion
+  - name: Remote
+    careers_url: https://job-boards.greenhouse.io/remotecom
+
+  # -- AI / ML --
+  - name: Cohere
+    careers_url: https://jobs.ashbyhq.com/cohere
+  - name: Perplexity
+    careers_url: https://jobs.ashbyhq.com/perplexity
+  - name: Poolside
+    careers_url: https://jobs.ashbyhq.com/poolside
+  - name: Legora
+    careers_url: https://jobs.ashbyhq.com/legora
+  - name: Tractable
+    careers_url: https://jobs.ashbyhq.com/tractable
+  - name: Peak
+    careers_url: https://job-boards.greenhouse.io/peak
+  - name: Quantexa
+    careers_url: https://jobs.ashbyhq.com/quantexa
+  - name: Beamery
+    careers_url: https://jobs.ashbyhq.com/beamery
+  - name: Vertice
+    careers_url: https://jobs.ashbyhq.com/vertice
+
+  # -- Security --
+  - name: Sophos
+    careers_url: https://jobs.lever.co/sophos
+  - name: Immersive Labs
+    careers_url: https://jobs.ashbyhq.com/immersivelabs
+  - name: Mindgard
+    careers_url: https://apply.workable.com/mindgard
+
+  # -- Energy / health / public --
+  - name: Octopus Energy
+    careers_url: https://jobs.lever.co/octoenergy
+  - name: OVO Energy
+    careers_url: https://job-boards.greenhouse.io/ovoenergy
+  - name: Genomics England
+    careers_url: https://careers.smartrecruiters.com/genomicsengland
+  - name: Zoe
+    careers_url: https://jobs.ashbyhq.com/zoe
+  - name: Cera
+    careers_url: https://careers.smartrecruiters.com/ceracare
