@@ -172,25 +172,41 @@ def _scan_lever(slug, company):
 def _scan_smartrecruiters(slug, company):
     # ponytail: list endpoint has no description field; a real one needs a
     # per-posting GET. Skipped — heuristic scores fine on title+location alone.
-    data = _get_json(
-        f"https://api.smartrecruiters.com/v1/companies/{slug}/postings?limit=100", timeout=30
-    )
+    #
+    # Paginated, capped at 5 pages (500 postings). A single limit=100 request
+    # silently truncated the large boards — Wise alone publishes ~395, so the
+    # scanner was seeing a quarter of it and never knew.
+    page_size = 100
+    max_pages = 5
     jobs = []
-    for j in data.get("content", []):
-        loc = j.get("location") or {}
-        location = ", ".join(p for p in (loc.get("city"), loc.get("region"), loc.get("country")) if p)
-        if loc.get("remote"):
-            location = f"{location} (Remote)" if location else "Remote"
-        jobs.append(
-            {
-                "title": j.get("name", ""),
-                "url": f"https://jobs.smartrecruiters.com/{slug}/{j.get('id', '')}",
-                "company": company,
-                "location": location,
-                "description": "",
-                "posted_date": (j.get("releasedDate") or "")[:10],
-            }
+    offset = 0
+    for _ in range(max_pages):
+        data = _get_json(
+            f"https://api.smartrecruiters.com/v1/companies/{slug}/postings"
+            f"?limit={page_size}&offset={offset}",
+            timeout=30,
         )
+        content = data.get("content", [])
+        if not content:
+            break
+        for j in content:
+            loc = j.get("location") or {}
+            location = ", ".join(p for p in (loc.get("city"), loc.get("region"), loc.get("country")) if p)
+            if loc.get("remote"):
+                location = f"{location} (Remote)" if location else "Remote"
+            jobs.append(
+                {
+                    "title": j.get("name", ""),
+                    "url": f"https://jobs.smartrecruiters.com/{slug}/{j.get('id', '')}",
+                    "company": company,
+                    "location": location,
+                    "description": "",
+                    "posted_date": (j.get("releasedDate") or "")[:10],
+                }
+            )
+        offset += page_size
+        if offset >= data.get("totalFound", 0):
+            break
     return jobs
 
 
