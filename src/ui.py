@@ -27,6 +27,7 @@ Deliberately stdlib http.server: no dependency, no build step, nothing to
 deploy. Binds to loopback only; meant to be run for a few minutes and closed.
 """
 
+import errno
 import json
 import os
 import re
@@ -427,7 +428,20 @@ def main():
     from src.render_latex import find_engine
 
     engine = find_engine()
-    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    try:
+        server = ThreadingHTTPServer((HOST, PORT), Handler)
+    except OSError as e:
+        if e.errno != errno.EADDRINUSE:
+            raise
+        # Almost always a previous instance still running, which a traceback
+        # states in the least useful way possible.
+        raise SystemExit(
+            f"Port {PORT} is already in use — an earlier triage UI is probably still running.\n"
+            f"Either open http://{HOST}:{PORT} (it's already there), stop the old one with\n"
+            f"  pkill -f 'src.ui'\n"
+            f"or pick another port:\n"
+            f"  CAREER_BOT_UI_PORT={PORT + 1} python -m src.ui"
+        )
     print(f"career-bot triage UI  ->  http://{HOST}:{PORT}   (ctrl-c to stop)")
     print(f"LaTeX engine: {engine[0] if engine else 'none found — use the Overleaf button'}")
     try:
