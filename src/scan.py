@@ -6,6 +6,7 @@ No scraping. No Indeed. No LinkedIn. Read-only GETs/POSTs against documented
 provider's own embedded job-search widget calls client-side.
 """
 
+import datetime
 import html
 import json
 import re
@@ -87,6 +88,7 @@ def _scan_greenhouse(slug, company):
                 "company": company,
                 "location": (j.get("location") or {}).get("name", ""),
                 "description": _html_to_text(j.get("content", "")),
+                "posted_date": (j.get("updated_at") or "")[:10],
             }
         )
     return jobs
@@ -107,6 +109,7 @@ def _scan_ashby(slug, company):
                         "company": company,
                         "location": j.get("location", ""),
                         "description": j.get("descriptionPlain", "") or "",
+                        "posted_date": (j.get("publishedAt") or "")[:10],
                     }
                 )
             return jobs
@@ -121,6 +124,12 @@ def _scan_lever(slug, company):
     data = _get_json(f"https://api.lever.co/v0/postings/{slug}", timeout=30)
     jobs = []
     for j in data:
+        created_ms = j.get("createdAt")
+        posted_date = (
+            datetime.datetime.fromtimestamp(created_ms / 1000, tz=datetime.timezone.utc).date().isoformat()
+            if created_ms
+            else ""
+        )
         jobs.append(
             {
                 "title": j.get("text", ""),
@@ -128,6 +137,7 @@ def _scan_lever(slug, company):
                 "company": company,
                 "location": (j.get("categories") or {}).get("location", ""),
                 "description": j.get("descriptionPlain", "") or "",
+                "posted_date": posted_date,
             }
         )
     return jobs
@@ -152,6 +162,7 @@ def _scan_smartrecruiters(slug, company):
                 "company": company,
                 "location": location,
                 "description": "",
+                "posted_date": (j.get("releasedDate") or "")[:10],
             }
         )
     return jobs
@@ -172,6 +183,7 @@ def _scan_workable(slug, company):
                 "company": company,
                 "location": location,
                 "description": "",
+                "posted_date": j.get("published_on", "") or "",
             }
         )
     return jobs
@@ -195,6 +207,9 @@ def _scan_personio(host, company):
                 "company": company,
                 "location": ", ".join(o for o in offices if o),
                 "description": description,
+                # Personio's XML schema doesn't consistently expose a creation
+                # date across tenants — best-effort, empty if absent.
+                "posted_date": pos.findtext("createdAt", ""),
             }
         )
     return jobs
@@ -225,6 +240,10 @@ def _scan_workday(tenant, wdnum, site, company):
                     "company": company,
                     "location": j.get("locationsText", ""),
                     "description": "",
+                    # Workday exposes this as relative human text ("Posted
+                    # Today", "Posted 30+ Days Ago"), not an ISO date — still
+                    # useful signal, so pass it through as-is.
+                    "posted_date": j.get("postedOn", ""),
                 }
             )
         offset += page_size
@@ -245,6 +264,7 @@ def _scan_recruitee(host, company):
                 "company": company,
                 "location": location,
                 "description": _html_to_text(j.get("description", "")),
+                "posted_date": (j.get("published_at") or j.get("created_at") or "")[:10],
             }
         )
     return jobs
@@ -279,6 +299,7 @@ def _scan_breezy(host, company):
                 "company": company,
                 "location": location,
                 "description": _html_to_text(j.get("description", "")),
+                "posted_date": (j.get("published_date") or "")[:10],
             }
         )
     return jobs
