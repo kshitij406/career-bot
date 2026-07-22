@@ -65,9 +65,11 @@ def tailor_cv(cv_text, jd_text, fmt="html"):
     """Tailor the CV to a JD. fmt="html" for the web/PDF path, "latex" for a
     .tex body the caller wraps in render_latex's preamble."""
     if fmt == "latex":
-        from src.render_latex import LATEX_PROMPT
+        # The model returns CONTENT, not markup: the template is fixed and
+        # rendered locally, so it cannot emit invalid LaTeX at all.
+        from src.render_latex import JSON_PROMPT
 
-        prompt = LATEX_PROMPT.replace("{cv}", cv_text).replace("{jd}", jd_text)
+        prompt = JSON_PROMPT.replace("{cv}", cv_text).replace("{jd}", jd_text)
     else:
         prompt = TAILOR_PROMPT.format(cv=cv_text, jd=jd_text)
 

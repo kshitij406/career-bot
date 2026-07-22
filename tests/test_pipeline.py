@@ -389,6 +389,64 @@ def test_docx_block_parsing_is_ats_safe():
     assert any(bold and text == "Go" for b in blocks for text, bold in b.runs)
 
 
+def test_structured_cv_render_escapes_everything():
+    import json as _json
+    from src.render_latex import build_document, extract_json, render_cv_latex
+
+    # The model returns content, never markup — so characters that used to
+    # break compilation ("C#/.NET", "R&D", "100%") are escaped on the way in
+    # and cannot produce an invalid document.
+    data = {
+        "name": "Kshitij Jha",
+        "contact": ["Canterbury, UK", "a@b.com", "github.com/x"],
+        "summary": "Uses C#/.NET 8 & Go. 100% backend.",
+        "experience": [{"org": "Imatic", "role": "Intern", "dates": "2026",
+                        "bullets": ["Built R&D tooling", "Shipped .NET APIs"]}],
+        "skills": {"Hard skills": "C#, Go", "Soft skills": "Teamwork"},
+        "education": [{"org": "University of Kent", "detail": "BSc CS"}],
+    }
+    body = render_cv_latex(data)
+    assert r"C\#/.NET 8 \& Go. 100\%" in body
+    assert r"R\&D" in body
+    # A stray "\NET"-style control sequence is now impossible: every backslash
+    # in the output came from this renderer, not from the model.
+    assert "\\NET" not in body
+    assert r"\item Shipped .NET APIs" in body
+    # Links are built here, so the model can't malform them.
+    assert r"\href{mailto:a@b.com}" in body
+    assert r"\href{https://github.com/x}" in body
+    # Skill categories must not run together into one paragraph.
+    assert body.count(r"\textbf{Hard skills:}") == 1
+
+    doc = build_document(_json.dumps(data))
+    assert doc.count("\\documentclass") == 1
+    assert doc.strip().endswith("\\end{document}")
+
+    # Fenced JSON and JSON with surrounding chatter both parse.
+    assert extract_json('```json\n{"name": "x"}\n```')["name"] == "x"
+    assert extract_json('Here you go:\n{"name": "y"}\nHope that helps')["name"] == "y"
+    assert extract_json("not json at all") is None
+
+
+def test_markdown_from_model_becomes_real_latex():
+    from src.render_latex import markdown_to_latex
+
+    # Asked for LaTeX, models still emit Markdown. It "compiles" — Markdown is
+    # just text to TeX — so it fails silently as literal brackets and hyphens
+    # in the PDF rather than as an error.
+    out = markdown_to_latex(
+        "[github.com/x](https://github.com/x) is **mine**\n- first\n- second\n"
+    )
+    assert r"\href{https://github.com/x}{github.com/x}" in out
+    assert r"\textbf{mine}" in out
+    assert r"\begin{itemize}" in out and out.count(r"\item") == 2
+    assert "](http" not in out
+
+    # An existing itemize must not be swept into a second, nested list.
+    already = "\\begin{itemize}\n  \\item real\n\\end{itemize}"
+    assert markdown_to_latex(already).count(r"\begin{itemize}") == 1
+
+
 def test_latex_document_assembly():
     from src.render_latex import build_document, escape_latex, find_engine
 
@@ -627,6 +685,10 @@ if __name__ == "__main__":
     print("test_fetch_description_failure_is_not_fatal passed")
     test_dedup()
     print("test_dedup passed")
+    test_structured_cv_render_escapes_everything()
+    print("test_structured_cv_render_escapes_everything passed")
+    test_markdown_from_model_becomes_real_latex()
+    print("test_markdown_from_model_becomes_real_latex passed")
     test_latex_document_assembly()
     print("test_latex_document_assembly passed")
     test_ui_output_paths_cannot_escape_output_dir()

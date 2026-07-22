@@ -17,6 +17,7 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - The Overleaf button in the UI is the ONLY action that sends CV content off the machine (to overleaf.com), and only on an explicit click. It must stay opt-in — never auto-submit.
 - CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
 - Generated content must never fabricate experience or metrics, and must never reference any personal relationship.
+- The model must never author LaTeX markup. It returns JSON content; `src/render_latex.py` owns the template and escapes every field. Do not move escaping responsibility back into the prompt.
 
 ## Architecture
 ```
@@ -47,8 +48,11 @@ src/notify.py         Discord webhook (stdout dry-run if webhook unset)
 src/run.py            pipeline: scan -> filter -> dedup -> score -> notify -> save seen
 src/tailor.py         MANUAL CLI: tailored CV HTML/PDF from a JD file -> output/ (+ .docx with --docx)
 src/render_docx.py    ATS-safe .docx renderer; needs the optional python-docx extra
-src/render_latex.py   LaTeX prompt + fixed ATS-safe preamble; compiles via tectonic/
-                        latexmk/pdflatex/xelatex/lualatex if any is installed
+src/render_latex.py   the model returns JSON CONTENT ONLY; render_cv_latex builds the
+                        document from a fixed template with every field escaped, so
+                        invalid LaTeX is impossible. Freeform LaTeX is a fallback path
+                        (markdown_to_latex + sanitize_latex repair it). Compiles via
+                        tectonic/latexmk/pdflatex/xelatex/lualatex if any is installed
 src/ui.py             MANUAL local triage UI (127.0.0.1:8765): review every scored job
                         (not just notified ones), set status, generate/edit/compile a
                         tailored LaTeX CV, or hand it to Overleaf
