@@ -8,7 +8,9 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - Reed and Adzuna are a separate category from the per-company ATS scanners: official, key-based keyword-search APIs (not scraping) that search across many employers. They live in `src/aggregators.py`, feed through the same `title_filter` as everything else, and get deduped against ATS-sourced postings before scoring.
 - Nothing gets submitted anywhere automatically. The bot notifies and scores; the owner decides and acts.
 - Discord notification only for jobs at or above the score threshold in `config/profile.yml`.
-- `src/tailor.py` and PDF generation are manual-only, never on cron — `src/run.py` and the workflow must never invoke them. Same rule for `src/gmail_auth_setup.py` (one-time OAuth consent).
+- `src/tailor.py` and PDF/DOCX generation are manual-only, never on cron — `src/run.py` and the workflow must never invoke them. Same rule for `src/gmail_auth_setup.py` (one-time OAuth consent) and `src/applications.py` (human-entered application state).
+- `python-docx` is an OPTIONAL extra, deliberately kept out of `requirements.txt` so the cron pipeline stays stdlib+pyyaml. Only `src/render_docx.py` may import it, and only behind a guarded import.
+- `applications.json` is human-entered and must never be written by the cron workflow — unlike `seen.json`, which the workflow rewrites every run.
 - CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
 - Generated content must never fabricate experience or metrics, and must never reference any personal relationship.
 
@@ -26,9 +28,12 @@ src/gmail_scan.py     parse LinkedIn/Indeed job-alert emails via read-only Gmail
 src/gmail_auth_setup.py  MANUAL, one-time: get a Gmail OAuth refresh token
 src/score.py          OpenRouter chat-completions scoring (0-100 + reason) against profile + CV
 src/seen.py           seen.json load/save/dedup
+src/applications.py   MANUAL CLI: which notified jobs were applied to + status history
+                        -> applications.json (never written by cron)
 src/notify.py         Discord webhook (stdout dry-run if webhook unset)
 src/run.py            pipeline: scan -> filter -> dedup -> score -> notify -> save seen
-src/tailor.py         MANUAL CLI: tailored CV HTML/PDF from a JD file -> output/
+src/tailor.py         MANUAL CLI: tailored CV HTML/PDF from a JD file -> output/ (+ .docx with --docx)
+src/render_docx.py    ATS-safe .docx renderer; needs the optional python-docx extra
 templates/cv-template.html  ATS-friendly template used by tailor.py
 tests/                offline fixture tests (no network, no API key)
 .github/workflows/scan.yml  cron every 6h + workflow_dispatch, commits seen.json
@@ -56,7 +61,9 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 - Full pipeline: `python -m src.run`
 - F1 org pipeline (separate scanner, own dedup store, no scoring model): `python -m src.f1_run`
 - Tests (offline): `python tests/test_pipeline.py`
-- Tailored CV (manual): `python -m src.tailor path/to/jd.txt`
+- Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (add `--docx` for an ATS-safe .docx; needs `pip install python-docx`)
+- Application tracking (manual): `python -m src.applications list|add|set`
+- Local scoring model (no rate limits): set `scoring.api_base` or export `CAREER_BOT_API_BASE=http://localhost:11434/v1`
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`
 
 ## Profile context

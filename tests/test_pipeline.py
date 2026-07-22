@@ -270,6 +270,60 @@ class _FakeHTTPResponse:
         return False
 
 
+def test_application_tracking_preserves_history():
+    import tempfile
+    from src.applications import load_applications, record_application, save_applications
+
+    job = {"url": "https://ats.example/1", "title": "SWE Placement",
+           "company": "Monzo", "location": "London", "score": 82}
+
+    apps = record_application(job, {}, "interested")
+    apps = record_application(job, apps, "applied")
+    apps = record_application(job, apps, "interview", note="phone screen")
+
+    entry = apps[job["url"]]
+    assert entry["status"] == "interview"
+    # The trail is the whole point of the store — a status change must never
+    # erase what came before it.
+    assert [h["status"] for h in entry["history"]] == ["interested", "applied", "interview"]
+    assert entry["history"][-1]["note"] == "phone screen"
+    first_seen = entry["first_seen"]
+
+    # Re-recording the same status is a no-op on history, not a duplicate row.
+    apps = record_application(job, apps, "interview")
+    assert len(apps[job["url"]]["history"]) == 3
+    assert apps[job["url"]]["first_seen"] == first_seen
+
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "applications.json")
+        save_applications(apps, path)
+        assert load_applications(path) == apps
+        # A missing file is an empty store, not a crash — first run has none.
+        assert load_applications(os.path.join(d, "nope.json")) == {}
+
+
+def test_docx_block_parsing_is_ats_safe():
+    # Only parse_blocks is exercised here: it's pure stdlib, so this stays
+    # green without the optional python-docx extra installed.
+    from src.render_docx import parse_blocks
+
+    blocks = parse_blocks(
+        "<h1>Kshitij</h1><p>Backend, <strong>Go</strong> and C#.</p>"
+        "<h2>Experience</h2><ul><li>Built a <strong>scanner</strong></li><li>Second</li></ul>"
+        "Loose text outside any tag"
+    )
+    styled = [(b.style, b.text()) for b in blocks]
+    assert styled[0] == ("Title", "Kshitij")
+    assert styled[2] == ("Heading 1", "Experience")
+    # Real bullet lists, not manually prefixed text — ATS parsers rely on the
+    # list style to keep bullets in reading order.
+    assert [s for s, _ in styled].count("List Bullet") == 2
+    # Text outside any block tag must be kept, not silently dropped.
+    assert any(t == "Loose text outside any tag" for _, t in styled)
+    # Bold is the one inline format carried through.
+    assert any(bold and text == "Go" for b in blocks for text, bold in b.runs)
+
+
 def test_heuristic_scoring_needs_no_network():
     """Default path: ai_enabled is unset/false, so no API key and no network call."""
     os.environ.pop("OPENROUTER_API_KEY", None)
@@ -408,6 +462,10 @@ if __name__ == "__main__":
     print("test_dedupe_jobs_prefers_authoritative_source_regardless_of_order passed")
     test_dedup()
     print("test_dedup passed")
+    test_docx_block_parsing_is_ats_safe()
+    print("test_docx_block_parsing_is_ats_safe passed")
+    test_application_tracking_preserves_history()
+    print("test_application_tracking_preserves_history passed")
     test_heuristic_scoring_needs_no_network()
     print("test_heuristic_scoring_needs_no_network passed")
     test_ai_scoring_refines_and_overrides_heuristic()

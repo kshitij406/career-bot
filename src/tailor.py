@@ -101,11 +101,12 @@ def tailor_cv(cv_text, jd_text):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("usage: python -m src.tailor <path-to-jd.txt>", file=sys.stderr)
+    positional = [a for a in sys.argv[1:] if not a.startswith("-")]
+    if len(positional) != 1:
+        print("usage: python -m src.tailor <path-to-jd.txt> [--docx]", file=sys.stderr)
         sys.exit(1)
 
-    jd_path = sys.argv[1]
+    jd_path = positional[0]
     with open(jd_path, "r", encoding="utf-8") as f:
         jd_text = f.read()
     with open("cv.md", "r", encoding="utf-8") as f:
@@ -141,6 +142,16 @@ def main():
         print(f"wrote {pdf_path}")
     else:
         print("no Chrome/Edge found — open the HTML and print to PDF")
+
+    # DOCX is opt-in: some portals parse .docx reliably and mangle
+    # headless-printed PDFs, but python-docx is an optional extra, so don't
+    # fail the run for anyone who hasn't installed it.
+    if "--docx" in sys.argv or os.environ.get("CAREER_BOT_DOCX"):
+        from src.render_docx import render_docx
+
+        docx_path = os.path.join("output", f"cv-tailored-{jd_basename}.docx")
+        render_docx(content_html, docx_path)
+        print(f"wrote {docx_path}")
 
 
 if __name__ == "__main__":
