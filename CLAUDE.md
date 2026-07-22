@@ -32,12 +32,29 @@ src/tailor.py         MANUAL CLI: tailored CV HTML/PDF from a JD file -> output/
 templates/cv-template.html  ATS-friendly template used by tailor.py
 tests/                offline fixture tests (no network, no API key)
 .github/workflows/scan.yml  cron every 6h + workflow_dispatch, commits seen.json
+
+config/f1_teams.json   2026-grid F1 teams + F1/FOM + FIA: confirmed careers_url + ats type
+seen_f1.json           F1 pipeline's own dedup store (separate from seen.json)
+src/f1_scan.py         fetch jobs from each F1 org per its ats type in f1_teams.json (reuses
+                        src/scan.py's recruitee/workable/workday fetchers + 3 new ones:
+                        Pinpoint, Haas's Drupal JSON:API, FIA's RSS feed); f1_title_filter
+                        (single include-keyword list + exclude-unless-"software" list, no
+                        scoring model); orgs with ats:"manual" (no public API found — Ferrari/
+                        SAP SuccessFactors, Red Bull/Oracle HCM, Mercedes/custom, Williams/
+                        Attrax, Audi-Sauber/custom, Racing Bulls/Red Bull portal) are skipped
+                        with a stderr notice, never scraped
+src/f1_notify.py        Discord webhook for F1 matches (reuses DISCORD_WEBHOOK_URL), one embed
+                        per job, dead-link (404/410) check before posting
+src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> dedup vs
+                        seen_f1.json -> notify -> save seen_f1.json
+.github/workflows/f1_scan.yml  cron every 12h + workflow_dispatch, commits seen_f1.json
 ```
 
 ## How to run
 - `pip install -r requirements.txt` (Python 3.12; deps: pyyaml — everything else is stdlib `urllib`)
 - Env vars / GitHub Actions secrets: `OPENROUTER_API_KEY`, `DISCORD_WEBHOOK_URL`, `REED_API_KEY`, `ADZUNA_APP_ID` + `ADZUNA_API_KEY` (aggregators skip gracefully if unset), and (if `config/gmail.yml` is enabled) `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
 - Full pipeline: `python -m src.run`
+- F1 org pipeline (separate scanner, own dedup store, no scoring model): `python -m src.f1_run`
 - Tests (offline): `python tests/test_pipeline.py`
 - Tailored CV (manual): `python -m src.tailor path/to/jd.txt`
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`

@@ -1,0 +1,94 @@
+{
+  "_comment": "F1 org careers pages + detected ATS, verified live 2026-07-17 (see src/f1_scan.py for fetchers). ats:'manual' means no public unauthenticated jobs API was found — check careers_url by hand.",
+  "teams": [
+    {
+      "name": "McLaren Racing",
+      "careers_url": "https://racingcareers.mclaren.com/",
+      "ats": "recruitee",
+      "slug": "mclaren"
+    },
+    {
+      "name": "Scuderia Ferrari",
+      "careers_url": "https://jobs.ferrari.com/",
+      "ats": "manual",
+      "notes": "SAP SuccessFactors — session-based portal, no public unauthenticated jobs API found."
+    },
+    {
+      "name": "Red Bull Racing",
+      "careers_url": "https://careers.redbullracing.com/",
+      "ats": "manual",
+      "notes": "Oracle Fusion Cloud Recruiting (Oracle HCM) — JS-rendered SPA, no public API found."
+    },
+    {
+      "name": "Mercedes-AMG Petronas F1 Team",
+      "careers_url": "https://www.mercedesamgf1.com/careers/vacancies",
+      "ats": "manual",
+      "notes": "Custom Next.js/Contentful build with internal auth on the apply flow; no public API found."
+    },
+    {
+      "name": "Aston Martin Aramco F1 Team",
+      "careers_url": "https://www.astonmartinf1.com/en-GB/careers",
+      "ats": "pinpoint",
+      "slug": "astonmartinf1"
+    },
+    {
+      "name": "Williams Racing",
+      "careers_url": "https://careers.williamsf1.com/",
+      "ats": "manual",
+      "notes": "Attrax recruitment platform — no clean JSON endpoint found. A legacy Workday instance (alcority.wd1.myworkdayjobs.com/WilliamsRacing) exists but currently 403s / redirects to a maintenance page."
+    },
+    {
+      "name": "Audi F1 Team",
+      "careers_url": "https://www.sauber-group.com/corporate/careers",
+      "ats": "manual",
+      "notes": "Formerly Sauber Motorsport AG / Stake F1 Team Kick Sauber. Custom Next.js site, no discoverable JSON API — job data is client-side rendered."
+    },
+    {
+      "name": "Alpine Racing",
+      "careers_url": "https://alliancewd.wd3.myworkdayjobs.com/alpine-racing-careers",
+      "ats": "workday",
+      "tenant": "alliancewd",
+      "wdnum": "wd3",
+      "site": "alpine-racing-careers"
+    },
+    {
+      "name": "Haas F1 Team",
+      "careers_url": "https://www.haasf1team.com/work-with-us",
+      "ats": "haas_drupal",
+      "api_url": "https://www.haasf1team.com/jsonapi/node/job_listing"
+    },
+    {
+      "name": "Racing Bulls (VCARB)",
+      "careers_url": "https://www.visacashapprb.com/int-en/careers",
+      "ats": "manual",
+      "notes": "Redirects into Red Bull's proprietary jobs.redbull.com portal; no clean JSON API found."
+    },
+    {
+      "name": "Cadillac F1 Team",
+      "careers_url": "https://opportunities.cadillacf1team.com/en/jobs",
+      "ats": "workable",
+      "slug": "cadillacf1team"
+    },
+    {
+      "name": "Formula 1 / Formula One Management",
+      "careers_url": "https://corp.formula1.com/careers/",
+      "ats": "workday",
+      "tenant": "formulaone",
+      "wdnum": "wd3",
+      "site": "F1"
+    },
+    {
+      "name": "Liberty Media Corporation",
+      "careers_url": "https://www.libertymedia.com/careers",
+      "ats": "manual",
+      "notes": "Parent holding company, a separate legal entity from Formula 1 itself. No matching ATS found; listed no open roles at research time. Low priority."
+    },
+    {
+      "name": "FIA",
+      "careers_url": "https://careers.fia.com/",
+      "ats": "fia_rss",
+      "api_url": "https://careers.fia.com/rss.php",
+      "notes": "Legacy eRecruiting system with a working RSS feed. Roles skew technical/regulatory-safety and administrative rather than software — low volume, lower priority per profile."
+    }
+  ]
+}
