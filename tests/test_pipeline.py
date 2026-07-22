@@ -188,6 +188,64 @@ def test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text()
     assert len(deduped) == 1, "same job across sources must still collapse despite postcode vs city name"
 
 
+def test_dedupe_jobs_normalizes_company_legal_suffix_and_title_parenthetical():
+    # Sources disagree on legal form and on parenthetical qualifiers for what
+    # is unambiguously one posting. Before normalization these stayed separate
+    # and both got notified.
+    ats = {
+        "title": "Software Engineer",
+        "company": "AJ Bell",
+        "url": "https://ats.example/1",
+        "location": "Manchester",
+    }
+    reed = {
+        "title": "Software Engineer (Remote)",
+        "company": "AJ Bell plc",
+        "url": "https://www.reed.co.uk/jobs/1",
+        "location": "M53EE",
+        "source": "reed",
+    }
+    deduped = dedupe_jobs([ats, reed])
+    assert len(deduped) == 1, "legal suffix + parenthetical must not hide a duplicate"
+
+    # Accents and punctuation fold too.
+    a = {"title": "Backend Engineer", "company": "Société Générale", "url": "u1", "location": "London"}
+    b = {"title": "Backend Engineer", "company": "Societe Generale", "url": "u2",
+         "location": "London", "source": "adzuna"}
+    assert len(dedupe_jobs([a, b])) == 1
+
+    # Genuinely different employers must still stay separate.
+    x = {"title": "Software Engineer", "company": "Monzo", "url": "u3", "location": "London"}
+    y = {"title": "Software Engineer", "company": "Starling Bank", "url": "u4", "location": "London"}
+    assert len(dedupe_jobs([x, y])) == 2
+
+
+def test_dedupe_jobs_prefers_authoritative_source_regardless_of_order():
+    ats = {
+        "title": "Software Engineer",
+        "company": "AJ Bell",
+        "url": "https://ats.example/real-application-form",
+        "location": "Manchester",
+    }
+    reed = {
+        "title": "Software Engineer",
+        "company": "AJ Bell",
+        "url": "https://www.reed.co.uk/jobs/redirect",
+        "location": "M53EE",
+        "source": "reed",
+    }
+    # The ATS copy must win from either input order — callers should not have
+    # to remember to list ATS sources first.
+    assert dedupe_jobs([ats, reed])[0]["url"] == ats["url"]
+    assert dedupe_jobs([reed, ats])[0]["url"] == ats["url"], "aggregator-first order must still yield the ATS copy"
+
+    # Position in the output is preserved when the incumbent is replaced, so
+    # unrelated jobs around it keep their order.
+    other = {"title": "Data Analyst", "company": "Ocado", "url": "u9", "location": "Hatfield"}
+    out = dedupe_jobs([reed, other, ats])
+    assert [j["url"] for j in out] == [ats["url"], "u9"]
+
+
 def test_dedup():
     jobs = load_fixtures()
     job1, job2, job3 = jobs
@@ -344,6 +402,10 @@ if __name__ == "__main__":
     print("test_dedupe_jobs_keeps_same_company_same_title_different_office passed")
     test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text()
     print("test_dedupe_jobs_collapses_cross_source_despite_incompatible_location_text passed")
+    test_dedupe_jobs_normalizes_company_legal_suffix_and_title_parenthetical()
+    print("test_dedupe_jobs_normalizes_company_legal_suffix_and_title_parenthetical passed")
+    test_dedupe_jobs_prefers_authoritative_source_regardless_of_order()
+    print("test_dedupe_jobs_prefers_authoritative_source_regardless_of_order passed")
     test_dedup()
     print("test_dedup passed")
     test_heuristic_scoring_needs_no_network()

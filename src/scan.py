@@ -13,6 +13,7 @@ import re
 import sys
 import time
 import random
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -498,6 +499,45 @@ def _normalize_location(location):
     return _LOCATION_ALIASES.get(loc, loc)
 
 
+# Legal-form suffixes that differ between sources for the same employer:
+# Reed says "AJ Bell plc", the ATS board says "AJ Bell". Stripping them is
+# safe because no two distinct employers differ only by legal form.
+_COMPANY_NOISE_RE = re.compile(
+    r"\b(?:inc|llc|ltd|limited|corp|corporation|gmbh|bv|nv|sa|ag|plc|co|company|group|holdings)\b\.?",
+    re.IGNORECASE,
+)
+_NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _fold(value):
+    """Lowercase, strip accents, collapse to alphanumerics — so "Société
+    Générale" and "societe generale" compare equal."""
+    decomposed = unicodedata.normalize("NFKD", value or "")
+    stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return _NON_ALNUM_RE.sub("", stripped.lower())
+
+
+def _company_key(company):
+    return _fold(_COMPANY_NOISE_RE.sub("", company or ""))
+
+
+def _title_key(title):
+    # Parenthetical qualifiers vary by source for what is unambiguously the
+    # same posting — "(Remote)", "(12 Month Placement)", "(f/m/d)".
+    return _fold(_PARENTHETICAL_RE.sub("", title or ""))
+
+
+# Lower wins when the same job turns up from two sources. The employer's own
+# ATS board is canonical: its URL is the real application form rather than an
+# aggregator redirect, and its description is usually the fullest.
+SOURCE_PRIORITY = {"ats": 10, "gmail": 20, "reed": 30, "adzuna": 30}
+DEFAULT_SOURCE_PRIORITY = 50
+
+
+def _source_rank(source):
+    return SOURCE_PRIORITY.get(source, DEFAULT_SOURCE_PRIORITY)
+
+
 def dedupe_jobs(jobs):
     """Collapse duplicate postings, keyed on normalized (title, company) plus
     location — but location is only compared *within* the same source.
@@ -523,14 +563,23 @@ def dedupe_jobs(jobs):
     (not blocked) so it's possible to audit them periodically as more
     companies turn up on multiple sources — see the comment on that branch.
 
-    First occurrence wins, so callers should list ATS/Gmail sources before
-    aggregator sources.
+    Title and company are matched on normalized keys (_title_key/_company_key),
+    so "AJ Bell plc" matches "AJ Bell" and "Software Engineer (Remote)" matches
+    "Software Engineer". This catches true duplicates that formatting
+    differences used to hide — but note it also makes the cross-source branch
+    below fire more often, since looser matching means more collapses. The
+    log line there is the audit trail for exactly that.
+
+    When the same job appears from two sources, the one from the
+    highest-priority source wins (SOURCE_PRIORITY: the employer's own ATS
+    board over an aggregator), regardless of the order callers pass them in.
     """
-    seen_sources_by_key = {}  # (title, company) -> {source: {normalized_location: raw_location}}
+    # base_key -> {source: {normalized_location: (raw_location, index in kept)}}
+    seen_sources_by_key = {}
     kept = []
     for job in jobs:
-        title = job.get("title", "").strip().lower()
-        company = job.get("company", "").strip().lower()
+        title = _title_key(job.get("title", ""))
+        company = _company_key(job.get("company", ""))
         source = job.get("source", "ats")
         raw_location = job.get("location", "")
         location = _normalize_location(raw_location)
@@ -540,7 +589,8 @@ def dedupe_jobs(jobs):
 
         if source in locations_by_source:
             if location in locations_by_source[source]:
-                continue  # same source, same (normalized) location -> duplicate
+                # same source, same (normalized) location -> duplicate
+                continue
         elif locations_by_source:
             # ACCEPTED RISK, not a solved case: we cannot check location
             # agreement here. Reed returns bare postcodes ("M53EE"), Adzuna
@@ -553,15 +603,22 @@ def dedupe_jobs(jobs):
             # just fixed for same-source — this branch has no structural
             # fix, only the log line below for visibility.
             other_source, other_locations = next(iter(locations_by_source.items()))
-            other_raw_location = next(iter(other_locations.values()))
+            other_raw_location, other_index = next(iter(other_locations.values()))
             print(
                 "info: dedupe_jobs collapsed cross-source with no location agreement: "
                 f"{job.get('title', '')!r} @ {job.get('company', '')!r} "
                 f"[{source} loc={raw_location!r}] vs [{other_source} loc={other_raw_location!r}]",
                 file=sys.stderr,
             )
-            continue  # a different source already reported this title+company -> treated as same real job
+            # A different source already reported this title+company, so it's
+            # treated as the same real job — but keep whichever copy comes
+            # from the more authoritative source, not whichever arrived first.
+            if _source_rank(source) < _source_rank(other_source):
+                kept[other_index] = job
+                del locations_by_source[other_source]
+                locations_by_source[source] = {location: (raw_location, other_index)}
+            continue
 
-        locations_by_source.setdefault(source, {})[location] = raw_location
+        locations_by_source.setdefault(source, {})[location] = (raw_location, len(kept))
         kept.append(job)
     return kept
