@@ -8,7 +8,7 @@ import yaml
 from src.aggregators import fetch_adzuna_jobs, fetch_reed_jobs
 from src.gmail_scan import scan_gmail_alerts
 from src.notify import notify
-from src.scan import dedupe_jobs, scan_all, title_filter
+from src.scan import dedupe_jobs, enrich_descriptions, scan_all, title_filter
 from src.score import score_jobs
 from src.seen import is_new, load_seen, record, save_seen
 
@@ -46,6 +46,11 @@ def main():
 
     seen = load_seen()
     new_jobs = [j for j in filtered if is_new(j, seen)]
+
+    # Fetch descriptions only for what's actually about to be scored —
+    # SmartRecruiters and Workday need a per-posting request, so doing this
+    # any earlier would mean one per posting across every board.
+    new_jobs = enrich_descriptions(new_jobs)
 
     scored = score_jobs(new_jobs, profile, cv_text) if new_jobs else []
 

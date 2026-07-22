@@ -246,6 +246,59 @@ def test_dedupe_jobs_prefers_authoritative_source_regardless_of_order():
     assert [j["url"] for j in out] == [ats["url"], "u9"]
 
 
+def test_enrich_descriptions_only_touches_providers_that_need_it():
+    from src import scan as scan_module
+
+    calls = []
+
+    def fake_fetch(detail):
+        calls.append(detail)
+        return "fetched description with go and python"
+
+    original = scan_module._fetch_description
+    scan_module._fetch_description = fake_fetch
+    try:
+        jobs = [
+            {"title": "A", "description": "", "_detail": ("smartrecruiters", "acme", "1")},
+            {"title": "B", "description": "", "_detail": ("workday", "https://x/wday/cxs/a/b", "/job/1")},
+            # Already has a description — must not be re-fetched.
+            {"title": "C", "description": "already here", "_detail": ("smartrecruiters", "acme", "2")},
+            # Greenhouse/Ashby/Lever/Workable carry no _detail at all.
+            {"title": "D", "description": "from the list endpoint"},
+        ]
+        scan_module.enrich_descriptions(jobs)
+    finally:
+        scan_module._fetch_description = original
+
+    assert len(calls) == 2, "only the two empty-description jobs should be fetched"
+    assert jobs[0]["description"].startswith("fetched")
+    assert jobs[2]["description"] == "already here"
+    assert jobs[3]["description"] == "from the list endpoint"
+
+    # No pending work must mean no thread pool and no requests at all.
+    scan_module._fetch_description = lambda d: (_ for _ in ()).throw(AssertionError("must not fetch"))
+    try:
+        scan_module.enrich_descriptions([{"title": "E", "description": "x"}])
+    finally:
+        scan_module._fetch_description = original
+
+
+def test_fetch_description_failure_is_not_fatal():
+    from src import scan as scan_module
+
+    original = scan_module._get_json
+    scan_module._get_json = lambda *a, **k: (_ for _ in ()).throw(OSError("network down"))
+    try:
+        # A dead detail endpoint must yield "" rather than raise — the
+        # heuristic still scores on title+location, so this can never be the
+        # reason a real match goes unnotified.
+        assert scan_module._fetch_description(("smartrecruiters", "acme", "1")) == ""
+        assert scan_module._fetch_description(("workday", "https://x", "/job/1")) == ""
+    finally:
+        scan_module._get_json = original
+    assert scan_module._fetch_description(("unknown-provider", "x", "y")) == ""
+
+
 def test_dedup():
     jobs = load_fixtures()
     job1, job2, job3 = jobs
@@ -497,6 +550,10 @@ if __name__ == "__main__":
     print("test_dedupe_jobs_normalizes_company_legal_suffix_and_title_parenthetical passed")
     test_dedupe_jobs_prefers_authoritative_source_regardless_of_order()
     print("test_dedupe_jobs_prefers_authoritative_source_regardless_of_order passed")
+    test_enrich_descriptions_only_touches_providers_that_need_it()
+    print("test_enrich_descriptions_only_touches_providers_that_need_it passed")
+    test_fetch_description_failure_is_not_fatal()
+    print("test_fetch_description_failure_is_not_fatal passed")
     test_dedup()
     print("test_dedup passed")
     test_latex_document_assembly()

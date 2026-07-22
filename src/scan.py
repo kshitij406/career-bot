@@ -6,6 +6,7 @@ No scraping. No Indeed. No LinkedIn. Read-only GETs/POSTs against documented
 provider's own embedded job-search widget calls client-side.
 """
 
+import concurrent.futures
 import datetime
 import html
 import json
@@ -171,8 +172,10 @@ def _scan_lever(slug, company):
 
 
 def _scan_smartrecruiters(slug, company):
-    # ponytail: list endpoint has no description field; a real one needs a
-    # per-posting GET. Skipped — heuristic scores fine on title+location alone.
+    # The list endpoint has no description; the real one needs a per-posting
+    # GET. Rather than pay that N+1 at scan time for every posting, each job
+    # carries the identifiers needed to fetch it later — enrich_descriptions()
+    # does that for the handful that survive filtering.
     #
     # Paginated, capped at 5 pages (500 postings). A single limit=100 request
     # silently truncated the large boards — Wise alone publishes ~395, so the
@@ -203,6 +206,7 @@ def _scan_smartrecruiters(slug, company):
                     "location": location,
                     "description": "",
                     "posted_date": (j.get("releasedDate") or "")[:10],
+                    "_detail": ("smartrecruiters", slug, j.get("id", "")),
                 }
             )
         offset += page_size
@@ -212,8 +216,13 @@ def _scan_smartrecruiters(slug, company):
 
 
 def _scan_workable(slug, company):
-    # ponytail: same as SmartRecruiters — list endpoint omits description.
-    data = _get_json(f"https://apply.workable.com/api/v1/widget/accounts/{slug}", timeout=30)
+    # details=true returns full descriptions for every posting in the same
+    # request — no per-posting fetch needed here, unlike SmartRecruiters and
+    # Workday. Verified against a live board: 29/29 postings came back with a
+    # description, for one request instead of 30.
+    data = _get_json(
+        f"https://apply.workable.com/api/v1/widget/accounts/{slug}?details=true", timeout=45
+    )
     jobs = []
     for j in data.get("jobs", []):
         location = ", ".join(p for p in (j.get("city"), j.get("state"), j.get("country")) if p)
@@ -225,7 +234,7 @@ def _scan_workable(slug, company):
                 "url": j.get("url", ""),
                 "company": company,
                 "location": location,
-                "description": "",
+                "description": _html_to_text(j.get("description", "")),
                 "posted_date": j.get("published_on", "") or "",
             }
         )
@@ -287,6 +296,11 @@ def _scan_workday(tenant, wdnum, site, company):
                     # Today", "Posted 30+ Days Ago"), not an ISO date — still
                     # useful signal, so pass it through as-is.
                     "posted_date": j.get("postedOn", ""),
+                    "_detail": (
+                        "workday",
+                        f"https://{tenant}.{wdnum}.myworkdayjobs.com/wday/cxs/{tenant}/{site}",
+                        j.get("externalPath", ""),
+                    ),
                 }
             )
         offset += page_size
@@ -439,11 +453,77 @@ def scan_company(company):
     return []
 
 
-def scan_all(portals_cfg):
-    """Scan every company in portals.yml. A failed company is skipped, never crashes."""
-    jobs = []
-    for company in portals_cfg.get("companies", []):
-        jobs.extend(scan_company(company))
+def scan_all(portals_cfg, max_workers=8):
+    """Scan every company in portals.yml. A failed company is skipped, never crashes.
+
+    Concurrent because this is pure network wait — 119 companies served
+    serially is 119 round trips end to end. Workers are capped low: these are
+    other people's public APIs and there is no deadline here worth hammering
+    them for. Results keep portals.yml order so runs stay comparable.
+    """
+    companies = portals_cfg.get("companies", [])
+    if not companies:
+        return []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        # executor.map preserves input order and re-raises nothing, since
+        # scan_company already swallows per-company failures.
+        return [job for jobs in pool.map(scan_company, companies) for job in jobs]
+
+
+def _fetch_description(detail):
+    """Fetch one posting's description. Returns "" on any failure."""
+    provider = detail[0]
+    try:
+        if provider == "smartrecruiters":
+            _, slug, posting_id = detail
+            if not posting_id:
+                return ""
+            data = _get_json(
+                f"https://api.smartrecruiters.com/v1/companies/{slug}/postings/{posting_id}",
+                timeout=30,
+            )
+            sections = (data.get("jobAd") or {}).get("sections") or {}
+            # Concatenated because requirements often carry the stack keywords
+            # while jobDescription is mostly company boilerplate.
+            parts = [
+                (sections.get(key) or {}).get("text", "")
+                for key in ("jobDescription", "qualifications", "additionalInformation")
+            ]
+            return _html_to_text(" ".join(p for p in parts if p))
+        if provider == "workday":
+            _, base, external_path = detail
+            if not external_path:
+                return ""
+            data = _get_json(f"{base}{external_path}", timeout=30)
+            info = data.get("jobPostingInfo") or {}
+            return _html_to_text(info.get("jobDescription") or "")
+    except Exception:  # noqa: BLE001 - a missing description is not a failure
+        return ""
+    return ""
+
+
+def enrich_descriptions(jobs, max_workers=6):
+    """Fill in descriptions for providers whose list endpoint omits them.
+
+    Called late — on the jobs that already survived filtering and dedup —
+    because this is the one N+1 in the pipeline. Doing it at scan time would
+    mean a request per posting across every board; doing it here means a
+    request per posting actually worth scoring, which is a handful per run.
+
+    Greenhouse, Ashby, Lever, Workable, Recruitee, Breezy and Personio all
+    return descriptions in their list response and never reach this.
+
+    A failed fetch leaves the description empty rather than raising: the
+    heuristic scores acceptably on title and location alone, so a flaky detail
+    endpoint must not cost a notification.
+    """
+    pending = [j for j in jobs if j.get("_detail") and not j.get("description")]
+    if not pending:
+        return jobs
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for job, description in zip(pending, pool.map(_fetch_description, (j["_detail"] for j in pending))):
+            if description:
+                job["description"] = description
     return jobs
 
 

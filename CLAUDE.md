@@ -24,7 +24,11 @@ config/gmail.yml      LinkedIn/Indeed alert-sender addresses + lookback window
 config/aggregators.yml  Reed/Adzuna search keywords + location default
 cv.md                 canonical CV (owner-maintained)
 seen.json             dedup store, committed back by the workflow
-src/scan.py           fetch jobs from Greenhouse/Ashby/Lever/SmartRecruiters/Workable/Personio/Workday/Recruitee/Breezy public APIs; title_filter; dedupe_jobs
+src/scan.py           fetch jobs from Greenhouse/Ashby/Lever/SmartRecruiters/Workable/Personio/Workday/Recruitee/Breezy public APIs; title_filter; dedupe_jobs;
+                        scan_all is concurrent (8 workers, portals.yml order preserved);
+                        enrich_descriptions fills descriptions for SmartRecruiters/Workday,
+                        whose list endpoints omit them (the pipeline's only N+1 — run late,
+                        on new+filtered jobs only)
 src/aggregators.py     Reed/Adzuna keyword search across employers (official APIs, not scraping)
 src/gmail_scan.py     parse LinkedIn/Indeed job-alert emails via read-only Gmail API
 src/gmail_auth_setup.py  MANUAL, one-time: get a Gmail OAuth refresh token
@@ -65,7 +69,7 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 ## How to run
 - `pip install -r requirements.txt` (Python 3.12; deps: pyyaml — everything else is stdlib `urllib`)
 - Env vars / GitHub Actions secrets: `OPENROUTER_API_KEY`, `DISCORD_WEBHOOK_URL`, `REED_API_KEY`, `ADZUNA_APP_ID` + `ADZUNA_API_KEY` (aggregators skip gracefully if unset), and (if `config/gmail.yml` is enabled) `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
-- Full pipeline: `python -m src.run`
+- Full pipeline: `python -m src.run` (concurrent scan; ~3.3x faster than serial on a 25-company sample)
 - F1 org pipeline (separate scanner, own dedup store, no scoring model): `python -m src.f1_run`
 - Tests (offline): `python tests/test_pipeline.py`
 - Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (`--docx` for ATS-safe .docx, `--latex` for .tex + PDF)
