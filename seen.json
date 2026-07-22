@@ -1,36 +1,48 @@
 {
   "https://apply.workable.com/j/A150699345": {
     "company": "Starling Bank",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 56,
     "title": "Information Security Analyst - Cyber Threat Intelligence - 12 month FTC"
   },
   "https://boards.greenhouse.io/cloudflare/jobs/8013562?gh_jid=8013562": {
     "company": "Cloudflare",
+    "delisted": true,
     "first_seen": "2026-07-15",
     "score": 40,
     "title": "Network Strategy Intern (Fall 2026)"
   },
   "https://boards.greenhouse.io/cloudflare/jobs/8031027?gh_jid=8031027": {
     "company": "Cloudflare",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 40,
+    "reason": "Rule-based: placement/year-in-industry framing, stack overlap (python), start-date conflict, not available until ~July 2027 ('fall 2026'), too short for the 44-week placement requirement ('12-week')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Network Strategy Intern (Fall 2026)"
   },
   "https://boards.greenhouse.io/cloudflare/jobs/8041135?gh_jid=8041135": {
     "company": "Cloudflare",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 40,
+    "reason": "Rule-based: placement/year-in-industry framing, stack overlap (python), start-date conflict, not available until ~July 2027 ('fall 2026'), too short for the 44-week placement requirement ('12 week')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Technical Support Engineer Intern (Fall 2026)"
   },
   "https://boards.greenhouse.io/cloudflare/jobs/8052785?gh_jid=8052785": {
     "company": "Cloudflare",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 40,
+    "reason": "Rule-based: placement/year-in-industry framing, stack overlap (python), start-date conflict, not available until ~July 2027 ('fall 2026'), too short for the 44-week placement requirement ('12 week')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Software Engineer Intern (Fall 2026) - Austin, TX"
   },
   "https://boards.greenhouse.io/cloudflare/jobs/8060959?gh_jid=8060959": {
     "company": "Cloudflare",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 56,
     "title": "Security Engineer Intern (Fall 2026)"
@@ -79,12 +91,16 @@
   },
   "https://job-boards.greenhouse.io/canonical/jobs/7785136": {
     "company": "Canonical",
+    "delisted": false,
     "first_seen": "2026-07-16",
+    "reason": "Rule-based: placement/year-in-industry framing, stack overlap (python)",
+    "role_type": "other",
     "score": 56,
     "title": "Software Engineer, Automotive and Industrial Architecture"
   },
   "https://job-boards.greenhouse.io/gocardless/jobs/7916619": {
     "company": "GoCardless",
+    "delisted": true,
     "first_seen": "2026-07-15",
     "score": 46,
     "title": "Data Analyst (12 month FTC)"
@@ -109,7 +125,10 @@
   },
   "https://jobs.ashbyhq.com/freetrade/f44c9df8-ec02-4fde-a75e-ad0f220147cd": {
     "company": "Freetrade",
+    "delisted": false,
     "first_seen": "2026-07-16",
+    "reason": "Rule-based: placement/year-in-industry framing, UK location (onsite/hybrid/remote, relocation OK), stack overlap (python)",
+    "role_type": "internship",
     "score": 66,
     "title": "Security Engineer Intern"
   },
@@ -133,272 +152,375 @@
   },
   "https://jobs.ashbyhq.com/snowflake/26a0ae52-97a6-4a46-9216-3c382570d89b": {
     "company": "Snowflake",
+    "delisted": false,
     "first_seen": "2026-07-16",
-    "score": 62,
+    "reason": "Rule-based: placement/year-in-industry framing, duration likely covers the 44-week requirement, non-UK location (zurich), stack overlap (golang), start-date conflict, not available until ~July 2027 ('may 2026')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Software Engineer Intern - Zurich (2026)"
   },
   "https://jobs.ashbyhq.com/snowflake/41e65c6c-a01e-4f40-af14-ae75d3b95e27": {
     "company": "Snowflake",
+    "delisted": false,
     "first_seen": "2026-07-16",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, duration likely covers the 44-week requirement, non-UK location (berlin), start-date conflict, not available until ~July 2027 ('february 2026')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Software Engineer Intern - Berlin (2026)"
   },
   "https://jobs.ashbyhq.com/snowflake/897e1850-c590-4462-b187-0516b65b2034": {
     "company": "Snowflake",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 62,
     "title": "Software Engineer Intern (AI/ML) - 2026"
   },
   "https://jobs.lever.co/palantir/09846827-b931-4a9f-bd64-c3bb8860187b": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 25,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york), experience-level red flag (5+ years)",
+    "role_type": "internship",
+    "score": 0,
     "title": "Privacy and Civil Liberties Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/1b6f1d82-d459-4dea-8bc2-8d2ffe6f881a": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (france), stack overlap (python)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Forward Deployed Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/315f695d-04d1-4a9a-848e-cb2bec7a997e": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (hi)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/373367a9-3160-49d8-b7af-2efec062fad1": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (seattle), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Production Infrastructure"
   },
   "https://jobs.lever.co/palantir/373eb939-6f57-4836-8479-be79a5e07249": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (denver), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/37964982-9b4c-471e-a1d8-fb8f45d7f116": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Production Infrastructure"
   },
   "https://jobs.lever.co/palantir/395a4483-fc3d-4b77-a500-501923fd0976": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (australia)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - AUS Government"
   },
   "https://jobs.lever.co/palantir/3ab9e715-1ea9-4c6c-ad50-7340eac14e86": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Production Infrastructure"
   },
   "https://jobs.lever.co/palantir/3db7e40a-28e0-4ad1-96c5-93de5bc96aa9": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/4d29249a-d7e8-4c39-880d-3b35d7b2f6f6": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - Commercial"
   },
   "https://jobs.lever.co/palantir/5c4c65c5-77da-4d36-856c-4ade87631019": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - USG"
   },
   "https://jobs.lever.co/palantir/5c7bb70c-83ea-43e7-8055-0c8f319f4333": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - USG"
   },
   "https://jobs.lever.co/palantir/655f9937-a4ce-4e7d-80e2-a6659af07329": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Year at Palantir - Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/75cc1c09-8ebd-44c8-b3bc-d122cd1fecb3": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (chicago)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - Commercial"
   },
   "https://jobs.lever.co/palantir/7d69cf8a-06fd-4f05-bd84-27149db29c4d": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/8bcf4f33-0a79-4248-bbfd-49ac4be9dd8e": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Defense Tech"
   },
   "https://jobs.lever.co/palantir/8f362a1f-1eff-4327-94c1-ff46e2101c69": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (palo alto)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/9e40d77f-b07c-437b-98e7-def9b0184d89": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - Intel"
   },
   "https://jobs.lever.co/palantir/a483f41b-0da9-42ea-8ed6-cbf6eb93cc6d": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (palo alto), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Defense Tech"
   },
   "https://jobs.lever.co/palantir/ac0dc094-2480-43c2-8495-26ade227ff4f": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, duration likely covers the 44-week requirement, non-UK location (new york), start-date conflict, not available until ~July 2027 ('october 2026')",
+    "role_type": "internship",
+    "score": 0,
     "title": "Forward Deployed Software Engineer, Internship - France"
   },
   "https://jobs.lever.co/palantir/b229baac-494b-4a0d-9a13-2e38806e06f3": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Infrastructure"
   },
   "https://jobs.lever.co/palantir/bdcfb29f-4f27-42de-933f-7f83a359b9f0": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/cccfe1bd-f15b-4fe5-b044-c793e7961c1b": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - Defense Tech"
   },
   "https://jobs.lever.co/palantir/cf5f44ff-1b0b-4752-bcd4-2dc88798f25b": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Infrastructure Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/d5486403-c050-4920-b2e0-91b69b61ebb2": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (chicago)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - Commercial"
   },
   "https://jobs.lever.co/palantir/d582cd84-14fd-4aa3-b413-15982d286bd9": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - Poland"
   },
   "https://jobs.lever.co/palantir/e0010393-c300-446f-bf67-fa2ef067f16f": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/e27af7ab-41fc-40c9-b31d-02c6cb1c505c": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (palo alto), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship"
   },
   "https://jobs.lever.co/palantir/e6789b17-62fb-4226-a079-f8c17ff19e2d": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (new york)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Year at Palantir - Forward Deployed Software Engineer, Internship - Commercial"
   },
   "https://jobs.lever.co/palantir/e6ff8bf2-135e-474d-ad37-24f490ae1dd2": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 50,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington)",
+    "role_type": "internship",
+    "score": 15,
     "title": "Forward Deployed Software Engineer, Internship - US Government"
   },
   "https://jobs.lever.co/palantir/f17e98d0-046a-4e6e-9d65-ed0b12dd0ff7": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (washington), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Defense Tech"
   },
   "https://jobs.lever.co/palantir/f221738b-e97c-4ce3-a12a-17ada2b855e4": {
     "company": "Palantir",
+    "delisted": false,
     "first_seen": "2026-07-15",
-    "score": 56,
+    "reason": "Rule-based: placement/year-in-industry framing, non-UK location (palo alto), stack overlap (react)",
+    "role_type": "internship",
+    "score": 21,
     "title": "Software Engineer, Internship - Infrastructure"
   },
   "https://mastercard.wd1.myworkdayjobs.com/CorporateCareers/job/Dunstable-England-Vocalink/Data-Centre-Infrastructure-Apprentice_R-280889": {
     "company": "Mastercard",
+    "delisted": false,
     "first_seen": "2026-07-22",
+    "reason": "Rule-based: keyword-filter match only, no additional signals",
+    "role_type": "other",
     "score": 40,
     "title": "Data Centre Infrastructure Apprentice"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Brentwood-TN/Presales-Systems-Engineer--Fall-2026-Co-Op-_R66714": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 40,
     "title": "Presales Systems Engineer (Fall 2026 Co-Op)"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Mexico-City-Mexico/Data-Analyst-Internship_R65547": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 50,
     "title": "Data Analyst Internship"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Ontario-Remote-Work/Data-Analyst-Co-Op_R65918": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 40,
     "title": "Data Analyst Co-Op"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Ontario-Remote-Work/Data-Engineering-Co-Op_R65916": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-16",
     "score": 40,
     "title": "Data Engineering Co-Op"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Penang-Malaysia/Intern---Electrical-Electronic-Engineering_R66798": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-17",
     "score": 40,
     "title": "Intern - Electrical/Electronic Engineering"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Penang-Malaysia/Software-Engineer-Intern_R66283": {
     "company": "Motorola Solutions",
+    "delisted": true,
     "first_seen": "2026-07-21",
     "score": 40,
     "title": "Software Engineer Intern"
   },
   "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Taipei-Taiwan-ZTW27/Customer-Support-Engineer-Intern_R66744": {
     "company": "Motorola Solutions",
+    "delisted": false,
     "first_seen": "2026-07-22",
-    "score": 40,
+    "reason": "Rule-based: non-UK location (taiwan)",
+    "role_type": "internship",
+    "score": 5,
     "title": "Customer Support Engineer Intern"
-  },
-  "https://www.adzuna.co.uk/jobs/details/5776436325?utm_medium=api&utm_source=aac03520": {
-    "company": "Vertiv Group",
-    "first_seen": "2026-07-16",
-    "score": 50,
-    "title": "Placement Student - Software Engineering"
-  },
-  "https://www.adzuna.co.uk/jobs/details/5785366029?utm_medium=api&utm_source=aac03520": {
-    "company": "Alpine Racing",
-    "first_seen": "2026-07-16",
-    "score": 60,
-    "title": "Software Engineering Student Placement"
   }
 }

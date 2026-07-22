@@ -6,3 +6,6 @@ credentials.json
 output/
 .pytest_cache/
 career-ops-upstream/
+
+# Local cache of full job records (descriptions) — rebuildable, not worth committing.
+jobs_cache.json

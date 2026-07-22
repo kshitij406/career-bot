@@ -11,6 +11,8 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - `src/tailor.py` and PDF/DOCX generation are manual-only, never on cron — `src/run.py` and the workflow must never invoke them. Same rule for `src/gmail_auth_setup.py` (one-time OAuth consent) and `src/applications.py` (human-entered application state).
 - `python-docx` is an OPTIONAL extra, deliberately kept out of `requirements.txt` so the cron pipeline stays stdlib+pyyaml. Only `src/render_docx.py` may import it, and only behind a guarded import.
 - `applications.json` is human-entered and must never be written by the cron workflow — unlike `seen.json`, which the workflow rewrites every run.
+- `jobs_cache.json` is gitignored and rebuildable. Descriptions must never be written into `seen.json`, which the workflow commits every run.
+- Scoring penalties must never fire on benefits/process text. A bare week count is not a duration: "16 weeks parental leave" and "3-5 weeks interview process" matched 1000+ postings before context checks were added.
 - `src/ui.py` is a manual, loopback-only tool (127.0.0.1). It must never bind 0.0.0.0, never be exposed, and never be started by the workflow. Paths it serves are confined to `output/`.
 - The Overleaf button in the UI is the ONLY action that sends CV content off the machine (to overleaf.com), and only on an explicit click. It must stay opt-in — never auto-submit.
 - CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
@@ -34,6 +36,11 @@ src/gmail_scan.py     parse LinkedIn/Indeed job-alert emails via read-only Gmail
 src/gmail_auth_setup.py  MANUAL, one-time: get a Gmail OAuth refresh token
 src/score.py          OpenRouter chat-completions scoring (0-100 + reason) against profile + CV
 src/seen.py           seen.json load/save/dedup
+src/jobcache.py       jobs_cache.json (GITIGNORED): full job records incl. descriptions,
+                        so the UI can fill the JD and rescore can re-run the heuristic
+src/rescore.py        MANUAL CLI: re-score seen.json from the cache (--scan to refresh
+                        first, --prune to drop 404/410). Marks postings missing from a
+                        fresh scan as delisted. Never notifies.
 src/applications.py   MANUAL CLI: which notified jobs were applied to + status history
                         -> applications.json (never written by cron)
 src/notify.py         Discord webhook (stdout dry-run if webhook unset)
@@ -75,6 +82,8 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 - Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (`--docx` for ATS-safe .docx, `--latex` for .tex + PDF)
 - Triage UI (manual): `python -m src.ui` -> http://127.0.0.1:8765
 - Application tracking (manual): `python -m src.applications list|add|set`
+- Re-score after a heuristic change (manual): `python -m src.rescore --scan`
+  (run.py only scores unseen jobs, so the backlog keeps stale scores otherwise)
 - Local model (no rate limits): `CAREER_BOT_API_BASE=http://localhost:11434/v1 CAREER_BOT_MODEL=qwen3:8b python -m src.ui`
   (both env vars are needed — endpoint and model always move together)
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`

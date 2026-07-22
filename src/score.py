@@ -69,6 +69,92 @@ UK_LOCATION_KEYWORDS = [
     "liverpool", "sheffield", "newcastle", "cardiff", "belfast",
     "nottingham", "cambridge", "oxford", "reading", "southampton", "brighton",
 ]
+# A placement year needs 44 weeks, so a 10-week summer internship can never
+# qualify. But a bare week count is a terrible signal: audited across 8957
+# cached postings, "16 weeks" was parental leave (376 times), "6 weeks" was
+# onboarding training (247), "4 weeks" was work-from-anywhere allowance (192),
+# "2 weeks" was a sabbatical, "3-5 weeks" was the interview process. Penalising
+# any of those would bury a genuine 12-month placement whose JD happens to list
+# its benefits.
+#
+# So a week count only counts as a duration when duration context sits next to
+# it, and never when benefits/process context does.
+_WEEK_COUNT_RE = re.compile(r"\b(?:[1-9]|1[0-9])\s*(?:-|–|\s|to)?\s*(?:\d{1,2}\s*)?weeks?\b")
+# "rotation" is a disqualifier, not a duration word: "1-week rotations within
+# our devops team" describes a segment of a long programme, not its length.
+_DURATION_CONTEXT_RE = re.compile(
+    r"\b(intern(?:ship)?|placement|programme|program|scheme|cohort|contract|role|position)\b"
+)
+_BENEFITS_CONTEXT_RE = re.compile(
+    r"\b(leave|holiday|vacation|sabbatical|pto|maternity|paternity|parental|notice|"
+    r"training|onboarding|interview|process|sick|bereavement|allowance|disability|"
+    r"insurance|paid\s+time|travel\w*|rotation\w*|per\s+(?:month|week|quarter|year)|a\s+year)\b"
+)
+_CONTEXT_WINDOW = 60
+
+# Unambiguous on its own — no summer programme runs 44 weeks.
+_SUMMER_RE = re.compile(r"\bsummer\s+(?:intern(?:ship)?|analyst|programme|program|scheme)\b")
+
+
+def _short_duration_signal(text):
+    """Return the matched phrase if the text states a too-short duration.
+
+    Checks a window either side of each week count: duration words qualify it,
+    benefits/process words disqualify it. Benefits win ties, because a false
+    "too short" hides a real placement while a missed one merely leaves it
+    ranked slightly high.
+    """
+    summer = _SUMMER_RE.search(text)
+    if summer:
+        return summer.group(0)
+    for match in _WEEK_COUNT_RE.finditer(text):
+        window = text[max(0, match.start() - _CONTEXT_WINDOW): match.end() + _CONTEXT_WINDOW]
+        if _BENEFITS_CONTEXT_RE.search(window):
+            continue
+        if _DURATION_CONTEXT_RE.search(window):
+            return match.group(0).strip()
+    return None
+
+# Clear non-UK signals. A deliberate allowlist of foreign countries/cities
+# rather than "no UK keyword found": plenty of real UK postings say only
+# "Enstone" or "Hatfield", and penalizing those would be worse than missing a
+# few foreign ones. Only fires when the location has no UK signal at all.
+NON_UK_KEYWORDS = [
+    "switzerland", "zurich", "geneva", "germany", "berlin", "munich", "hamburg",
+    "france", "paris", "spain", "madrid", "barcelona", "netherlands", "amsterdam",
+    "ireland", "dublin", "poland", "warsaw", "krakow", "portugal", "lisbon", "porto",
+    "sweden", "stockholm", "denmark", "copenhagen", "norway", "oslo", "finland",
+    "helsinki", "italy", "milan", "rome", "austria", "vienna", "belgium", "brussels",
+    "czech", "prague", "romania", "bucharest", "bulgaria", "sofia", "greece", "athens",
+    "hungary", "budapest", "estonia", "tallinn", "latvia", "riga", "lithuania", "vilnius",
+    "united states", "usa", "new york", "san francisco", "san mateo", "palo alto",
+    "seattle", "austin", "boston", "chicago", "denver", "atlanta", "los angeles",
+    "canada", "toronto", "vancouver", "montreal", "india", "bangalore", "bengaluru",
+    "hyderabad", "pune", "singapore", "australia", "sydney", "melbourne", "japan",
+    "tokyo", "israel", "tel aviv", "dubai", "abu dhabi", "brazil", "sao paulo",
+    "mexico", "south africa", "cape town", "new zealand", "hong kong", "china",
+    "shanghai", "beijing", "korea", "seoul", "taiwan", "taipei", "vietnam", "manila",
+    "washington", "philadelphia", "dallas", "houston", "phoenix", "miami", "san diego",
+    "portland", "minneapolis", "detroit", "pittsburgh", "raleigh", "nashville", "san jose",
+    "sunnyvale", "mountain view", "bellevue", "redmond", "arlington", "mclean",
+]
+
+# A bare year is meaningless in a description (copyright lines, "founded in
+# 2019") but load-bearing in a title: "Software Engineer Intern - Zurich
+# (2026)" is unambiguously a 2026 intake. So bare years are matched against
+# the title only. The placement runs 2027-28, so 2026 and earlier conflict.
+_TITLE_STALE_YEAR_RE = re.compile(r"\b20(?:1\d|2[0-6])\b")
+
+# US state codes in the trailing position — "Cambridge, MA", "Austin, TX".
+# Catches the long tail of US cities without listing every one, and the
+# leading comma keeps it from firing on ordinary words.
+_US_STATE_RE = re.compile(
+    r",\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|MD|MA|MI|MN|MS|MO|"
+    r"MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC"
+    r"|D\.C\.)",
+    re.IGNORECASE,
+)
+
 STACK_KEYWORDS = ["c#", ".net", "react", "next.js", "nextjs", "golang", "go developer", "python"]
 RED_FLAG_KEYWORDS = ["5+ years", "7+ years", "10+ years", "phd required", "security clearance"]
 
@@ -112,6 +198,18 @@ DESCRIPTION_TRUNCATE = 4000
 _JSON_FENCE_RE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.DOTALL)
 
 
+def _matches_location(location, keywords):
+    """Word-boundary keyword match against a location string.
+
+    Substring matching was wrong here: "uk" is inside "Fukuoka", so a Japanese
+    office scored as UK. Returns the matched keyword, or None.
+    """
+    for kw in keywords:
+        if re.search(rf"(?<![a-z]){re.escape(kw)}(?![a-z])", location):
+            return kw
+    return None
+
+
 def _heuristic_score(job):
     """Deterministic 0-100 score from keyword/location/stack overlap. No network call."""
     title = (job.get("title") or "").lower()
@@ -130,7 +228,17 @@ def _heuristic_score(job):
         score += 6
         signals.append("duration likely covers the 44-week requirement")
 
-    if any(kw in location for kw in UK_LOCATION_KEYWORDS):
+    # Foreign is checked first and wins: "Cambridge, MA" and "London, Ontario"
+    # both contain a UK city name, so a UK-first check would score them as UK
+    # and never look further.
+    foreign = _matches_location(location, NON_UK_KEYWORDS) or _US_STATE_RE.search(location)
+    if foreign:
+        # Not a soft preference: the placement must be UK-based or UK-remote,
+        # so an explicitly foreign office is disqualifying.
+        score -= 35
+        matched = foreign if isinstance(foreign, str) else foreign.group(0).strip(", ")
+        signals.append(f"non-UK location ({matched})")
+    elif _matches_location(location, UK_LOCATION_KEYWORDS):
         score += 10
         signals.append("UK location (onsite/hybrid/remote, relocation OK)")
 
@@ -144,10 +252,17 @@ def _heuristic_score(job):
         score -= 25
         signals.append(f"experience-level red flag ({flags[0]})")
 
-    near_term = _NEAR_TERM_START_RE.search(text)
+    near_term = _NEAR_TERM_START_RE.search(text) or _TITLE_STALE_YEAR_RE.search(title)
     if near_term:
         score -= 30
         signals.append(f"start-date conflict, not available until ~July 2027 ({near_term.group(0)!r})")
+
+    short = _short_duration_signal(text)
+    if short:
+        # 44 weeks is a course requirement, so a summer-length internship can
+        # never qualify however good the role is.
+        score -= 35
+        signals.append(f"too short for the 44-week placement requirement ({short!r})")
 
     score = max(0, min(100, score))
 

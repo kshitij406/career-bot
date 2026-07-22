@@ -37,6 +37,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from src.applications import load_applications, record_application, save_applications
+from src.jobcache import load_cache
 from src.seen import load_seen
 
 HOST = "127.0.0.1"
@@ -70,18 +71,27 @@ def _safe_output_path(name):
 
 
 def build_rows():
-    """Merge the dedup store with application state into one view model."""
+    """Merge the dedup store, application state, and the job cache."""
     seen = load_seen()
     applications = load_applications()
+    cache = load_cache()
     rows = []
     for url, entry in seen.items():
         app = applications.get(url, {})
+        cached = cache.get(url, {})
         rows.append({
             "url": url,
             "title": entry.get("title", ""),
             "company": entry.get("company", ""),
             "score": entry.get("score", 0),
+            "reason": entry.get("reason", ""),
             "first_seen": entry.get("first_seen", ""),
+            "location": cached.get("location", ""),
+            "posted_date": cached.get("posted_date", ""),
+            # Presence drives the UI: a job with a cached JD can be tailored
+            # in one click, one without still needs a paste.
+            "has_jd": bool(cached.get("description")),
+            "delisted": bool(entry.get("delisted")),
             "status": app.get("status", ""),
             "history": app.get("history", []),
         })
@@ -116,8 +126,11 @@ button[disabled]{opacity:.5;cursor:default}
 .row2{margin-top:7px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .tag{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
 .tag.set{border-color:var(--accent);color:var(--accent)}
+.tag.dead{border-color:var(--warn);color:var(--warn)}
+.job:has(.tag.dead){opacity:.6}
 a{color:var(--accent)}
 .hist{font-size:12px;color:var(--mut);margin-top:6px}
+.why{font-size:12.5px;color:var(--mut);margin-top:5px}
 .empty{color:var(--mut);padding:30px 0}
 .err{color:#c0392b;white-space:pre-wrap}
 @media(prefers-color-scheme:dark){.err{color:#e8776a}}
@@ -148,6 +161,8 @@ iframe{flex:1;width:100%;border:0;background:#fff}
       <option>interview</option><option>offer</option><option>rejected</option><option>withdrawn</option></select>
     <select id="minscore"><option value="0">any score</option><option value="40">40+</option>
       <option value="50">50+</option><option value="60">60+ (notified)</option></select>
+    <label class="meta" style="display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="hidedead" checked style="width:auto"> hide delisted</label>
   </div>
   <div id="list"></div>
 </main>
@@ -165,7 +180,7 @@ iframe{flex:1;width:100%;border:0;background:#fff}
   </div>
   <div class="dlg-body">
     <div class="pane">
-      <div class="pane-head">job description — paste it here first</div>
+      <div class="pane-head">job description — filled from the cache, editable</div>
       <textarea id="jd" placeholder="Paste the job description.
 
 Descriptions aren't stored in seen.json (it's committed every run and would bloat it), so paste the JD you want to tailor against."></textarea>
@@ -202,17 +217,27 @@ const scoreClass=s=>s>=60?"s-hi":s>=45?"s-mid":"s-lo";
 function render(){
   const q=el("#q").value.toLowerCase(),st=el("#status").value,ms=+el("#minscore").value;
   const shown=rows.filter(r=>(!q||(r.title+" "+r.company).toLowerCase().includes(q))
-    &&(!st||(st==="none"?!r.status:r.status===st))&&r.score>=ms);
-  el("#summary").textContent=`${shown.length} of ${rows.length} jobs · ${rows.filter(r=>r.status).length} tracked`;
+    &&(!st||(st==="none"?!r.status:r.status===st))&&r.score>=ms
+    &&!(el("#hidedead").checked&&r.delisted));
+  const dead=rows.filter(r=>r.delisted).length;
+  el("#summary").textContent=`${shown.length} of ${rows.length} jobs · `
+    +`${rows.filter(r=>r.status).length} tracked · ${dead} delisted`;
   el("#list").innerHTML=shown.length?shown.map(card).join(""):'<div class="empty">nothing matches that filter</div>';
 }
 function card(r){
   const hist=r.history?.length?`<div class="hist">${r.history.map(h=>`${h.date} → ${h.status}${h.note?" · "+esc(h.note):""}`).join(" &nbsp;|&nbsp; ")}</div>`:"";
+  // The score alone is an opaque number; the reason is what makes it
+  // correctable by hand, so it sits on the card rather than behind a click.
+  const why=r.reason?`<div class="why">${esc(r.reason.replace(/^Rule-based:\s*/,""))}</div>`:"";
+  const where=[r.location,r.posted_date&&"posted "+r.posted_date].filter(Boolean).map(esc).join(" · ");
   return `<div class="job"><div class="job-top">
       <span class="score ${scoreClass(r.score)}">${r.score}</span>
       <span class="title">${esc(r.title)||"(untitled)"}</span>
       <span class="co">${esc(r.company)}</span>
-      <span class="meta">first seen ${r.first_seen}</span></div>
+      ${where?`<span class="meta">${where}</span>`:""}
+      <span class="meta">seen ${r.first_seen}</span>
+      ${r.delisted?'<span class="tag dead">delisted</span>':""}</div>
+    ${why}
     <div class="row2">
       <a href="${esc(r.url)}" target="_blank" rel="noopener">open posting ↗</a>
       <span class="tag ${r.status?"set":""}">${r.status||"untracked"}</span>
@@ -220,7 +245,7 @@ function card(r){
         <option value="">set status…</option>
         ${STATUSES.map(s=>`<option ${s===r.status?"selected":""}>${s}</option>`).join("")}
       </select>
-      <button onclick="openTailor('${esc(r.url)}')">tailor CV</button>
+      <button onclick="openTailor('${esc(r.url)}')">tailor CV${r.has_jd?"":" (no JD cached)"}</button>
     </div>${hist}</div>`;
 }
 async function setStatus(url,status){
@@ -228,13 +253,20 @@ async function setStatus(url,status){
   await fetch("/api/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,status})});
   await load();
 }
-function openTailor(url){
+async function openTailor(url){
   tailorUrl=url;texName=null;
   const r=rows.find(x=>x.url===url);
   el("#tailor-job").textContent=`${r.title} · ${r.company}`;
   el("#tailor-status").textContent="";el("#jd").value="";el("#tex").value="";
   el("#pdf-wrap").innerHTML='<div class="pane-msg" id="pdf-msg">Nothing compiled yet.</div>';
   el("#tailor").showModal();
+  // Fill the JD from the cache. Pasting it by hand was the main friction in
+  // the flow, and the scanner already fetched this text.
+  try{
+    const d=await (await fetch("/api/jd?url="+encodeURIComponent(url))).json();
+    if(d.jd){el("#jd").value=d.jd;status(`JD filled from cache (${d.jd.length} chars)`)}
+    else{status("no cached JD for this posting — paste it below",true)}
+  }catch(e){status("could not load JD: "+e,true)}
 }
 function status(msg,isErr){el("#tailor-status").innerHTML=isErr?`<span class="err">${esc(msg)}</span>`:esc(msg)}
 function showPdf(url){el("#pdf-wrap").innerHTML=`<iframe src="${esc(url)}#toolbar=1"></iframe>`}
@@ -275,7 +307,7 @@ el("#btn-overleaf").onclick=()=>{
   el("#overleaf-form").submit();
   status("sent to overleaf.com in a new tab");
 };
-["#q","#status","#minscore"].forEach(s=>el(s).addEventListener("input",render));
+["#q","#status","#minscore","#hidedead"].forEach(s=>el(s).addEventListener("input",render));
 load();
 </script></body></html>
 """
@@ -312,6 +344,17 @@ class Handler(BaseHTTPRequestHandler):
             # OpenRouter slug fails confusingly, and this makes it obvious.
             label = f"{_resolve_model(cfg)} @ {base}" + ("" if _is_openrouter(base) else "  (local)")
             return self._send(200, json.dumps({"rows": build_rows(), "endpoint_label": label}))
+        if path == "/api/jd":
+            # The tailor pane fills itself from this rather than asking for a
+            # paste; seen.json has no description, the cache does.
+            url = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("url", [""])[0]
+            cached = load_cache().get(url, {})
+            return self._send(200, json.dumps({
+                "jd": cached.get("description", ""),
+                "title": cached.get("title", ""),
+                "company": cached.get("company", ""),
+                "location": cached.get("location", ""),
+            }))
         if path.startswith("/output/"):
             return self._serve_output(path[len("/output/"):])
         return self._send(404, json.dumps({"error": "not found"}))

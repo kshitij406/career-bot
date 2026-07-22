@@ -426,6 +426,65 @@ def test_ui_output_paths_cannot_escape_output_dir():
     assert _slug("") == "job"
 
 
+def test_short_duration_ignores_benefits_and_process_text():
+    from src.score import _short_duration_signal
+
+    # Real strings from an audit of 8957 cached postings. Every one of these
+    # matched a bare week-count regex, and penalizing them would have buried
+    # genuine 12-month placements that merely list their benefits.
+    for benign in [
+        "parental leave: a minimum of 16 weeks fully paid maternity or paternity leave",
+        "training for the role is 6 weeks in the office",
+        "work from anywhere outside your typical working location - up to 4 weeks a year",
+        "2 weeks sabbatical after 4 years",
+        "we usually expect our interview process to take 3-5 weeks, end to end",
+        "willing to travel once every 4-8 weeks to see customers",
+        "towards the end of the programme there will be 1-week rotations within our devops team",
+        "traveling to customer sites and industry events, on average 1-2 weeks per month",
+    ]:
+        assert _short_duration_signal(benign) is None, benign
+
+    # Genuine short durations must still be caught.
+    for short in [
+        "available for a full-time, 12-week internship, working from our london office",
+        "internship program: 12 - 24 weeks, full-time, in-person in the london office",
+        "research internship: over 10-12 weeks, you'll work alongside experienced researchers",
+        "must be able to commit to a 12 week program",
+        "software engineering summer internship",
+    ]:
+        assert _short_duration_signal(short) is not None, short
+
+
+def test_non_uk_locations_are_penalized_and_uk_is_not():
+    from src.score import _heuristic_score
+
+    def score(location, title="Software Engineering Internship"):
+        return _heuristic_score({"title": title, "location": location, "description": ""})[0]
+
+    # Foreign is checked before UK: these all contain a UK city name or would
+    # otherwise slip through.
+    assert score("Cambridge, MA") < 30, "US Cambridge must not match UK Cambridge"
+    assert score("Washington, D.C.") < 30
+    assert score("Austin, TX") < 30
+    assert score("Zurich, Switzerland") < 30
+    assert score("Paris, France") < 30
+
+    # Genuine UK locations keep their bonus, including ones with no country.
+    assert score("London, UK") >= 55
+    assert score("Manchester") >= 55
+    assert score("Remote (UK)") >= 55
+
+    # "uk" is a substring of Fukuoka — this scored as UK before word
+    # boundaries were added.
+    from src.score import UK_LOCATION_KEYWORDS, _matches_location
+
+    assert _matches_location("fukuoka, japan", UK_LOCATION_KEYWORDS) is None
+
+    # A bare year is meaningful in a title even though it is noise in a
+    # description ("founded in 2019", copyright lines).
+    assert score("London, UK", "Software Engineer Intern - 2026") < 40
+
+
 def test_heuristic_scoring_needs_no_network():
     """Default path: ai_enabled is unset/false, so no API key and no network call."""
     os.environ.pop("OPENROUTER_API_KEY", None)
@@ -572,6 +631,10 @@ if __name__ == "__main__":
     print("test_latex_document_assembly passed")
     test_ui_output_paths_cannot_escape_output_dir()
     print("test_ui_output_paths_cannot_escape_output_dir passed")
+    test_short_duration_ignores_benefits_and_process_text()
+    print("test_short_duration_ignores_benefits_and_process_text passed")
+    test_non_uk_locations_are_penalized_and_uk_is_not()
+    print("test_non_uk_locations_are_penalized_and_uk_is_not passed")
     test_docx_block_parsing_is_ats_safe()
     print("test_docx_block_parsing_is_ats_safe passed")
     test_application_tracking_preserves_history()

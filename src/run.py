@@ -7,6 +7,7 @@ import yaml
 
 from src.aggregators import fetch_adzuna_jobs, fetch_reed_jobs
 from src.gmail_scan import scan_gmail_alerts
+from src.jobcache import load_cache, save_cache, update_cache
 from src.notify import notify
 from src.scan import dedupe_jobs, enrich_descriptions, scan_all, title_filter
 from src.score import score_jobs
@@ -60,6 +61,11 @@ def main():
     for job in scored:
         record(job, seen)
     save_seen(seen)
+
+    # Cache the full records (locally, gitignored) so the triage UI can fill
+    # the JD into the tailor pane and src.rescore can re-run the heuristic
+    # later. seen.json stays small because the workflow commits it.
+    save_cache(update_cache(scanned, load_cache()))
 
     notified = len([j for j in scored if j.get("score", 0) >= threshold])
     print(
