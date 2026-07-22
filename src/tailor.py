@@ -15,7 +15,7 @@ import urllib.request
 
 import yaml
 
-from src.score import _is_openrouter, _resolve_api_base
+from src.score import _is_openrouter, _resolve_api_base, _resolve_model
 
 TAILOR_PROMPT = """You are tailoring a candidate's CV to a specific job description.
 
@@ -85,7 +85,7 @@ def tailor_cv(cv_text, jd_text, fmt="html"):
 
     body = json.dumps(
         {
-            "model": scoring_cfg.get("model", "openai/gpt-oss-20b:free"),
+            "model": _resolve_model(scoring_cfg),
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 4096,
         }

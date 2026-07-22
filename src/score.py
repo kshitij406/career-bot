@@ -25,10 +25,23 @@ DEFAULT_API_BASE = "https://openrouter.ai/api/v1"
 # editing committed config.
 API_BASE_ENV = "CAREER_BOT_API_BASE"
 
+DEFAULT_MODEL = "openai/gpt-oss-20b:free"
+
+# Redirecting the endpoint without also redirecting the model is useless: an
+# OpenRouter slug like "openai/gpt-oss-20b:free" means nothing to Ollama, which
+# wants "qwen3:8b". These two always move together, so they get parallel
+# overrides — otherwise pointing at a local server requires editing (and later
+# un-editing) the profile.yml the cron depends on.
+MODEL_ENV = "CAREER_BOT_MODEL"
+
 
 def _resolve_api_base(scoring_cfg):
     base = os.environ.get(API_BASE_ENV) or scoring_cfg.get("api_base") or DEFAULT_API_BASE
     return base.rstrip("/")
+
+
+def _resolve_model(scoring_cfg):
+    return os.environ.get(MODEL_ENV) or scoring_cfg.get("model") or DEFAULT_MODEL
 
 
 def _is_openrouter(api_base):
@@ -225,7 +238,7 @@ def score_jobs(jobs, profile, cv_text):
         bool(api_key) or not _is_openrouter(api_base)
     )
 
-    model = scoring_cfg.get("model", "openai/gpt-oss-20b:free")
+    model = _resolve_model(scoring_cfg)
     system_prompt = build_system_prompt(profile, cv_text) if use_ai else None
 
     scored = []

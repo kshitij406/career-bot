@@ -303,10 +303,13 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/":
             return self._send(200, PAGE, "text/html; charset=utf-8")
         if path == "/api/jobs":
-            from src.score import _is_openrouter, _resolve_api_base
+            from src.score import _is_openrouter, _resolve_api_base, _resolve_model
 
-            base = _resolve_api_base(_load_scoring_cfg())
-            label = f"model endpoint: {base}" + ("" if _is_openrouter(base) else "  (local)")
+            cfg = _load_scoring_cfg()
+            base = _resolve_api_base(cfg)
+            # Show the model too: pointing at Ollama while still sending an
+            # OpenRouter slug fails confusingly, and this makes it obvious.
+            label = f"{_resolve_model(cfg)} @ {base}" + ("" if _is_openrouter(base) else "  (local)")
             return self._send(200, json.dumps({"rows": build_rows(), "endpoint_label": label}))
         if path.startswith("/output/"):
             return self._serve_output(path[len("/output/"):])

@@ -75,7 +75,8 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 - Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (`--docx` for ATS-safe .docx, `--latex` for .tex + PDF)
 - Triage UI (manual): `python -m src.ui` -> http://127.0.0.1:8765
 - Application tracking (manual): `python -m src.applications list|add|set`
-- Local scoring model (no rate limits): set `scoring.api_base` or export `CAREER_BOT_API_BASE=http://localhost:11434/v1`
+- Local model (no rate limits): `CAREER_BOT_API_BASE=http://localhost:11434/v1 CAREER_BOT_MODEL=qwen3:8b python -m src.ui`
+  (both env vars are needed — endpoint and model always move together)
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`
 
 ## Profile context

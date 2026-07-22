@@ -92,6 +92,18 @@ def test_api_base_is_configurable_and_local_needs_no_key():
     assert _is_openrouter("https://openrouter.ai/api/v1")
     assert not _is_openrouter("http://localhost:11434/v1")
 
+    # Endpoint and model always move together: an OpenRouter slug means
+    # nothing to Ollama, so redirecting one without the other just fails.
+    from src.score import _resolve_model
+
+    assert _resolve_model({}) == "openai/gpt-oss-20b:free"
+    assert _resolve_model({"model": "x/y:free"}) == "x/y:free"
+    os.environ["CAREER_BOT_MODEL"] = "qwen3:8b"
+    try:
+        assert _resolve_model({"model": "x/y:free"}) == "qwen3:8b"
+    finally:
+        os.environ.pop("CAREER_BOT_MODEL", None)
+
     captured = {}
 
     def fake_urlopen(req, timeout=60):
