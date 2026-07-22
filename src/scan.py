@@ -40,10 +40,36 @@ BREEZY_RE = re.compile(r"([a-z0-9\-]+\.breezy\.hr)")
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 
+# Matches an *escaped* opening tag — &lt;p&gt;, &lt;/div&gt;, &lt;h4 class=…
+# The (?:amp;)* handles doubly-escaped payloads (&amp;lt;p&amp;gt;), where the
+# literal &lt; only appears after the first unescape pass. Requiring a letter
+# or slash after the < keeps prose like "latency &lt; 200ms" from being
+# mistaken for markup.
+_ESCAPED_TAG_RE = re.compile(r"&(?:amp;)*lt;/?[a-zA-Z]")
+
 
 def _html_to_text(raw_html):
-    """Strip tags and unescape entities — good enough for keyword matching."""
-    return html.unescape(_HTML_TAG_RE.sub(" ", raw_html or "")).strip()
+    """Strip tags and unescape entities — good enough for keyword matching.
+
+    Unescape *before* stripping when the payload looks like escaped markup.
+    Greenhouse returns `content` with the tags themselves escaped
+    (&lt;div&gt;…), and stripping first is a silent trap: the tag regex finds
+    no real tags to remove, then unescape turns the entities into literal
+    <div> text that survives into the description. That noise then feeds
+    stack-overlap scoring and the AI scoring prompt.
+
+    Looped because a doubly-escaped source needs more than one pass; bounded
+    so a pathological input can't spin.
+    """
+    text = raw_html or ""
+    for _ in range(3):
+        if not _ESCAPED_TAG_RE.search(text):
+            break
+        unescaped = html.unescape(text)
+        if unescaped == text:
+            break
+        text = unescaped
+    return html.unescape(_HTML_TAG_RE.sub(" ", text)).strip()
 
 
 def _get_json(url, timeout):

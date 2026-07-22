@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.scan import dedupe_jobs, title_filter
+from src.scan import _html_to_text, dedupe_jobs, title_filter
 from src.seen import is_new
 from src.score import score_jobs
 from src.gmail_scan import parse_linkedin_alert, parse_indeed_alert
@@ -50,6 +50,30 @@ def test_title_filter():
     assert "Software Engineering Intern" in kept_titles
     assert "Senior Staff Engineer" not in kept_titles
     assert len(kept) == 2
+
+
+def test_html_to_text_handles_escaped_markup():
+    # Greenhouse returns `content` with the tags themselves escaped. Stripping
+    # before unescaping left the raw markup in the description verbatim, which
+    # then fed stack-overlap scoring and the AI prompt. Shape below is copied
+    # from a live boards-api.greenhouse.io response.
+    greenhouse = (
+        "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;"
+        "We want &lt;em&gt;Go&lt;/em&gt; and C# devs.&lt;/strong&gt;&lt;/p&gt;&lt;/div&gt;"
+    )
+    text = _html_to_text(greenhouse)
+    assert "<" not in text and ">" not in text, text
+    assert "class=" not in text, text
+    assert "Go" in text and "C#" in text
+
+    # Doubly-escaped payloads need more than one unescape pass.
+    assert "<" not in _html_to_text("&amp;lt;p&amp;gt;Backend role&amp;lt;/p&amp;gt;")
+
+    # Ordinary markup still works.
+    assert _html_to_text("<p>Python &amp; Go</p>").strip() == "Python & Go"
+
+    # A bare comparison in prose is not markup and must survive intact.
+    assert "200ms" in _html_to_text("latency &lt; 200ms")
 
 
 def test_dedupe_jobs_collapses_cross_source_duplicate():
@@ -268,6 +292,8 @@ def test_notify_survives_discord_failure():
 if __name__ == "__main__":
     test_title_filter()
     print("test_title_filter passed")
+    test_html_to_text_handles_escaped_markup()
+    print("test_html_to_text_handles_escaped_markup passed")
     test_dedupe_jobs_collapses_cross_source_duplicate()
     print("test_dedupe_jobs_collapses_cross_source_duplicate passed")
     test_dedupe_jobs_keeps_same_company_same_title_different_office()
