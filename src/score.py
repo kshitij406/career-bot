@@ -43,6 +43,22 @@ UK_LOCATION_KEYWORDS = [
 STACK_KEYWORDS = ["c#", ".net", "react", "next.js", "nextjs", "golang", "go developer", "python"]
 RED_FLAG_KEYWORDS = ["5+ years", "7+ years", "10+ years", "phd required", "security clearance"]
 
+# The candidate isn't available to start until around/after July 2027 (Stage 2
+# runs through the 2026-27 academic year first). A listing that explicitly
+# frames itself around an earlier start eats the same red-flag penalty as an
+# experience-level mismatch — it's a hard scheduling conflict, not a soft
+# preference. Deliberately scoped (year/month + intake-ish word, or
+# "immediate start") rather than a bare year, since a bare "2026" hits too
+# much unrelated text (copyright lines, company-founded-in-2026 mentions).
+_NEAR_TERM_START_RE = re.compile(
+    r"\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|"
+    r"aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|"
+    r"spring|summer|autumn|fall|winter)\s+202[0-6]\b"
+    r"|\b202[0-6]\s+(?:intake|cohort|start|placement|internship|programme|program|graduate scheme)\b"
+    r"|\b(?:intake|cohort|starting|commencing)\s+(?:in\s+)?202[0-6]\b"
+    r"|\bimmediate(?:ly)?\s+start\b|\basap\s+start\b|\bstart(?:ing)?\s+asap\b"
+)
+
 SYSTEM_PROMPT_TEMPLATE = """You score job listings for one specific candidate.
 
 Candidate profile:
@@ -98,6 +114,11 @@ def _heuristic_score(job):
     if flags:
         score -= 25
         signals.append(f"experience-level red flag ({flags[0]})")
+
+    near_term = _NEAR_TERM_START_RE.search(text)
+    if near_term:
+        score -= 30
+        signals.append(f"start-date conflict, not available until ~July 2027 ({near_term.group(0)!r})")
 
     score = max(0, min(100, score))
 
