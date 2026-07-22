@@ -324,6 +324,43 @@ def test_docx_block_parsing_is_ats_safe():
     assert any(bold and text == "Go" for b in blocks for text, bold in b.runs)
 
 
+def test_latex_document_assembly():
+    from src.render_latex import build_document, escape_latex, find_engine
+
+    assert escape_latex("C# & R&D 100% {x} _y_") == r"C\# \& R\&D 100\% \{x\} \_y\_"
+
+    # Models wrap output in fences often enough that it must be handled.
+    doc = build_document("```latex\n\\section{Experience}\nBuilt things.\n```")
+    assert "```" not in doc
+    assert doc.count("\\documentclass") == 1
+    assert doc.strip().endswith("\\end{document}")
+
+    # A full document from the model is passed through, not double-wrapped —
+    # a nested \documentclass is a guaranteed compile failure.
+    full = build_document("\\documentclass{article}\\begin{document}hi\\end{document}")
+    assert full.count("\\documentclass") == 1
+    # ...but a truncated one still gets closed.
+    assert build_document("\\documentclass{article}\\begin{document}hi").strip().endswith("\\end{document}")
+
+    # find_engine must not raise when no TeX is installed — that's the normal
+    # case on a fresh machine, and the .tex is still the deliverable.
+    assert find_engine() is None or isinstance(find_engine(), tuple)
+
+
+def test_ui_output_paths_cannot_escape_output_dir():
+    from src.ui import _safe_output_path, _slug
+
+    base = os.path.abspath("output")
+    assert _safe_output_path("cv.tex").startswith(base + os.sep)
+    for hostile in ("../../../etc/passwd", "/etc/passwd", "....//etc/shadow", "..\\..\\win.ini"):
+        resolved = _safe_output_path(hostile)
+        assert resolved is None or resolved.startswith(base + os.sep), hostile
+
+    # Slugs are used as filenames, so they must not carry separators through.
+    assert "/" not in _slug("Monzo/../../etc — Engineer (Placement)")
+    assert _slug("") == "job"
+
+
 def test_heuristic_scoring_needs_no_network():
     """Default path: ai_enabled is unset/false, so no API key and no network call."""
     os.environ.pop("OPENROUTER_API_KEY", None)
@@ -462,6 +499,10 @@ if __name__ == "__main__":
     print("test_dedupe_jobs_prefers_authoritative_source_regardless_of_order passed")
     test_dedup()
     print("test_dedup passed")
+    test_latex_document_assembly()
+    print("test_latex_document_assembly passed")
+    test_ui_output_paths_cannot_escape_output_dir()
+    print("test_ui_output_paths_cannot_escape_output_dir passed")
     test_docx_block_parsing_is_ats_safe()
     print("test_docx_block_parsing_is_ats_safe passed")
     test_application_tracking_preserves_history()

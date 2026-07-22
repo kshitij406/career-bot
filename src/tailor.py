@@ -61,7 +61,16 @@ def _scoring_cfg():
         return {}
 
 
-def tailor_cv(cv_text, jd_text):
+def tailor_cv(cv_text, jd_text, fmt="html"):
+    """Tailor the CV to a JD. fmt="html" for the web/PDF path, "latex" for a
+    .tex body the caller wraps in render_latex's preamble."""
+    if fmt == "latex":
+        from src.render_latex import LATEX_PROMPT
+
+        prompt = LATEX_PROMPT.replace("{cv}", cv_text).replace("{jd}", jd_text)
+    else:
+        prompt = TAILOR_PROMPT.format(cv=cv_text, jd=jd_text)
+
     scoring_cfg = _scoring_cfg()
     api_base = _resolve_api_base(scoring_cfg)
     # Tailoring is the iteration-heavy path — same JD reworked several times —
@@ -77,9 +86,7 @@ def tailor_cv(cv_text, jd_text):
     body = json.dumps(
         {
             "model": scoring_cfg.get("model", "openai/gpt-oss-20b:free"),
-            "messages": [
-                {"role": "user", "content": TAILOR_PROMPT.format(cv=cv_text, jd=jd_text)}
-            ],
+            "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 4096,
         }
     ).encode("utf-8")
@@ -103,7 +110,7 @@ def tailor_cv(cv_text, jd_text):
 def main():
     positional = [a for a in sys.argv[1:] if not a.startswith("-")]
     if len(positional) != 1:
-        print("usage: python -m src.tailor <path-to-jd.txt> [--docx]", file=sys.stderr)
+        print("usage: python -m src.tailor <path-to-jd.txt> [--docx] [--latex]", file=sys.stderr)
         sys.exit(1)
 
     jd_path = positional[0]
@@ -112,22 +119,39 @@ def main():
     with open("cv.md", "r", encoding="utf-8") as f:
         cv_text = f.read()
 
+    os.makedirs("output", exist_ok=True)
+    jd_name = os.path.splitext(os.path.basename(jd_path))[0]
+
+    # LaTeX is a separate output path, not a post-processing step on the HTML:
+    # the model produces .tex directly, so it is asked for LaTeX from the start.
+    if "--latex" in sys.argv:
+        from src.render_latex import LatexError, compile_pdf, write_tex
+
+        tex_path = write_tex(
+            tailor_cv(cv_text, jd_text, fmt="latex"),
+            os.path.join("output", f"cv-tailored-{jd_name}.tex"),
+        )
+        print(f"wrote {tex_path}")
+        try:
+            print(f"wrote {compile_pdf(tex_path)}")
+        except LatexError as e:
+            print(f"note: {e}", file=sys.stderr)
+        return
+
     content_html = tailor_cv(cv_text, jd_text)
 
     with open("templates/cv-template.html", "r", encoding="utf-8") as f:
         template = f.read()
     full_html = template.replace("{{CONTENT}}", content_html)
 
-    os.makedirs("output", exist_ok=True)
-    jd_basename = os.path.splitext(os.path.basename(jd_path))[0]
-    html_path = os.path.join("output", f"cv-tailored-{jd_basename}.html")
+    html_path = os.path.join("output", f"cv-tailored-{jd_name}.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(full_html)
     print(f"wrote {html_path}")
 
     browser = _find_browser()
     if browser:
-        pdf_path = os.path.join("output", f"cv-tailored-{jd_basename}.pdf")
+        pdf_path = os.path.join("output", f"cv-tailored-{jd_name}.pdf")
         abs_html = os.path.abspath(html_path)
         abs_pdf = os.path.abspath(pdf_path)
         subprocess.run(
@@ -149,7 +173,7 @@ def main():
     if "--docx" in sys.argv or os.environ.get("CAREER_BOT_DOCX"):
         from src.render_docx import render_docx
 
-        docx_path = os.path.join("output", f"cv-tailored-{jd_basename}.docx")
+        docx_path = os.path.join("output", f"cv-tailored-{jd_name}.docx")
         render_docx(content_html, docx_path)
         print(f"wrote {docx_path}")
 

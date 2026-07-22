@@ -11,6 +11,8 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - `src/tailor.py` and PDF/DOCX generation are manual-only, never on cron — `src/run.py` and the workflow must never invoke them. Same rule for `src/gmail_auth_setup.py` (one-time OAuth consent) and `src/applications.py` (human-entered application state).
 - `python-docx` is an OPTIONAL extra, deliberately kept out of `requirements.txt` so the cron pipeline stays stdlib+pyyaml. Only `src/render_docx.py` may import it, and only behind a guarded import.
 - `applications.json` is human-entered and must never be written by the cron workflow — unlike `seen.json`, which the workflow rewrites every run.
+- `src/ui.py` is a manual, loopback-only tool (127.0.0.1). It must never bind 0.0.0.0, never be exposed, and never be started by the workflow. Paths it serves are confined to `output/`.
+- The Overleaf button in the UI is the ONLY action that sends CV content off the machine (to overleaf.com), and only on an explicit click. It must stay opt-in — never auto-submit.
 - CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
 - Generated content must never fabricate experience or metrics, and must never reference any personal relationship.
 
@@ -34,6 +36,11 @@ src/notify.py         Discord webhook (stdout dry-run if webhook unset)
 src/run.py            pipeline: scan -> filter -> dedup -> score -> notify -> save seen
 src/tailor.py         MANUAL CLI: tailored CV HTML/PDF from a JD file -> output/ (+ .docx with --docx)
 src/render_docx.py    ATS-safe .docx renderer; needs the optional python-docx extra
+src/render_latex.py   LaTeX prompt + fixed ATS-safe preamble; compiles via tectonic/
+                        latexmk/pdflatex/xelatex/lualatex if any is installed
+src/ui.py             MANUAL local triage UI (127.0.0.1:8765): review every scored job
+                        (not just notified ones), set status, generate/edit/compile a
+                        tailored LaTeX CV, or hand it to Overleaf
 templates/cv-template.html  ATS-friendly template used by tailor.py
 tests/                offline fixture tests (no network, no API key)
 .github/workflows/scan.yml  cron every 6h + workflow_dispatch, commits seen.json
@@ -61,7 +68,8 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 - Full pipeline: `python -m src.run`
 - F1 org pipeline (separate scanner, own dedup store, no scoring model): `python -m src.f1_run`
 - Tests (offline): `python tests/test_pipeline.py`
-- Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (add `--docx` for an ATS-safe .docx; needs `pip install python-docx`)
+- Tailored CV (manual): `python -m src.tailor path/to/jd.txt` (`--docx` for ATS-safe .docx, `--latex` for .tex + PDF)
+- Triage UI (manual): `python -m src.ui` -> http://127.0.0.1:8765
 - Application tracking (manual): `python -m src.applications list|add|set`
 - Local scoring model (no rate limits): set `scoring.api_base` or export `CAREER_BOT_API_BASE=http://localhost:11434/v1`
 - Gmail OAuth setup (manual, one-time): `python -m src.gmail_auth_setup`
