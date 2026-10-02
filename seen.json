@@ -317,6 +317,12 @@
     "score": 0,
     "title": "Digital Twin Engineering Intern"
   },
+  "https://job-boards.greenhouse.io/graphcore/jobs/8862951002": {
+    "company": "Graphcore",
+    "first_seen": "2026-10-02",
+    "score": 21,
+    "title": "Machine Learning and Data Science Engineering Intern"
+  },
   "https://job-boards.greenhouse.io/monzo/jobs/8156261": {
     "company": "Monzo",
     "first_seen": "2026-09-28",
@@ -1347,6 +1353,12 @@
     "score": 60,
     "title": "Software Engineering Placement Programme"
   },
+  "https://www.adzuna.co.uk/jobs/details/5907680737?utm_medium=api&utm_source=aac03520": {
+    "company": "DailyPay",
+    "first_seen": "2026-10-02",
+    "score": 15,
+    "title": "Placement Software Engineer"
+  },
   "https://www.adzuna.co.uk/jobs/land/ad/5867231197?se=-GpDW6yp8RGUxabirk_x1Q&utm_medium=api&utm_source=aac03520&v=F7D968045A2D677AFA7F499006ADD5C4421744B0": {
     "company": "JPMorganChase",
     "first_seen": "2026-09-06",
@@ -1722,6 +1734,12 @@
   "https://www.adzuna.co.uk/jobs/land/ad/5867231197?se=Xq13Hhy98RGGRMm4C9apug&utm_medium=api&utm_source=aac03520&v=F7D968045A2D677AFA7F499006ADD5C4421744B0": {
     "company": "JPMorganChase",
     "first_seen": "2026-09-30",
+    "score": 66,
+    "title": "2027 Software Engineer Program - 12 Month Industrial Placement - Glasgow"
+  },
+  "https://www.adzuna.co.uk/jobs/land/ad/5867231197?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=F7D968045A2D677AFA7F499006ADD5C4421744B0": {
+    "company": "JPMorganChase",
+    "first_seen": "2026-10-02",
     "score": 66,
     "title": "2027 Software Engineer Program - 12 Month Industrial Placement - Glasgow"
   },
@@ -2427,6 +2445,12 @@
     "score": 30,
     "title": "Software Engineering Industrial Placement (Manchester)"
   },
+  "https://www.adzuna.co.uk/jobs/land/ad/5881155084?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=629ED5E84C6AF3A4E48C3D8721A13C2908820936": {
+    "company": "Lloyds Bank",
+    "first_seen": "2026-10-02",
+    "score": 30,
+    "title": "Software Engineering Industrial Placement (Manchester)"
+  },
   "https://www.adzuna.co.uk/jobs/land/ad/5881155084?se=_DUk5-i98RGwEo47mqVMVw&utm_medium=api&utm_source=aac03520&v=629ED5E84C6AF3A4E48C3D8721A13C2908820936": {
     "company": "Lloyds Bank",
     "first_seen": "2026-10-01",
@@ -2640,6 +2664,12 @@
   "https://www.adzuna.co.uk/jobs/land/ad/5885926438?se=Xq13Hhy98RGGRMm4C9apug&utm_medium=api&utm_source=aac03520&v=37D384A7A3198DF6C38025AF0A492DEE085DCA99": {
     "company": "MBDA",
     "first_seen": "2026-09-30",
+    "score": 50,
+    "title": "Software Engineer - Summer Placement 2027"
+  },
+  "https://www.adzuna.co.uk/jobs/land/ad/5885926438?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=37D384A7A3198DF6C38025AF0A492DEE085DCA99": {
+    "company": "MBDA",
+    "first_seen": "2026-10-02",
     "score": 50,
     "title": "Software Engineer - Summer Placement 2027"
   },
@@ -2988,6 +3018,12 @@
   "https://www.adzuna.co.uk/jobs/land/ad/5885927818?se=Xq13Hhy98RGGRMm4C9apug&utm_medium=api&utm_source=aac03520&v=DE6ACEFFC835D877054BBDD3C16730DB80AB26DD": {
     "company": "MBDA",
     "first_seen": "2026-09-30",
+    "score": 25,
+    "title": "Software Engineer - Undergraduate Placement 2027"
+  },
+  "https://www.adzuna.co.uk/jobs/land/ad/5885927818?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=DE6ACEFFC835D877054BBDD3C16730DB80AB26DD": {
+    "company": "MBDA",
+    "first_seen": "2026-10-02",
     "score": 25,
     "title": "Software Engineer - Undergraduate Placement 2027"
   },
@@ -3435,6 +3471,12 @@
     "score": 56,
     "title": "Undergraduate Software Engineer"
   },
+  "https://www.adzuna.co.uk/jobs/land/ad/5903978633?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=8AAC43A77288FFBF57DA30190B2F7BEAE09900E9": {
+    "company": "Hackajob Ltd",
+    "first_seen": "2026-10-02",
+    "score": 56,
+    "title": "Undergraduate Software Engineer"
+  },
   "https://www.adzuna.co.uk/jobs/land/ad/5903978633?se=_o9aplu98RGIFbjUyD4zhw&utm_medium=api&utm_source=aac03520&v=8AAC43A77288FFBF57DA30190B2F7BEAE09900E9": {
     "company": "Hackajob Ltd",
     "first_seen": "2026-10-01",
@@ -3452,6 +3494,12 @@
     "first_seen": "2026-10-01",
     "score": 56,
     "title": "Undergraduate Software Engineer"
+  },
+  "https://www.adzuna.co.uk/jobs/land/ad/5904185467?se=ZBMQ8Vy-8RGFK-1ZMzazSw&utm_medium=api&utm_source=aac03520&v=2229BD302285F41A8481B1BEB3E3C3B76AB42D46": {
+    "company": "Motability Operations",
+    "first_seen": "2026-10-02",
+    "score": 60,
+    "title": "Software Engineering Placement Programme"
   },
   "https://www.adzuna.co.uk/jobs/land/ad/5904185467?se=_o9aplu98RGIFbjUyD4zhw&utm_medium=api&utm_source=aac03520&v=2229BD302285F41A8481B1BEB3E3C3B76AB42D46": {
     "company": "Motability Operations",
