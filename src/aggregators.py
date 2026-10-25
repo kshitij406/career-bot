@@ -189,7 +189,7 @@ def fetch_targetjobs_jobs(cfg):
                 "opportunityTypes": cfg.get("opportunity_types", []),
                 "sectors": cfg.get("sectors", []),
                 "scrapeDetails": cfg.get("scrape_details", True),
-                "maxItems": cfg.get("max_items", 40),
+                "maxItems": cfg.get("max_items", 30),
                 "maxPages": cfg.get("max_pages", 3),
             }
             # run-sync caps at 300s server-side; the client timeout sits just past it.
