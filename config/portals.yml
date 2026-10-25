@@ -30,11 +30,24 @@
 # non-tech placements (e.g. "Management Accountant - 12 Month FTC") out —
 # without it, any title matching only a framing keyword would pass.
 title_filter:
+  # Dropped regardless of title (matched on normalized company name). Hackajob
+  # is a recruiting marketplace, not an employer: it relists the same generic
+  # placement ads on Adzuna under a new id every few days.
+  # "IT Online Learning", "Career Change" and "The Opportunity Hub" post
+  # "Placement Programme – No experience needed" ads that are paid training
+  # courses, not jobs.
+  exclude_companies:
+    - Hackajob
+    - IT Online Learning
+    - Career Change
+    - The Opportunity Hub UK
   role_keywords:
     - engineer
     - engineering
     - developer
-    - development
+    # bare "development" removed: it matched Business/Product/Research &
+    # Development placements. "web development" is the one we want.
+    - "web development"
     - software
     - programmer
     - programming
@@ -72,7 +85,6 @@ title_filter:
     - "placement scheme"
     - "placement programme"
     - "placement program"
-    - industrial
     - "industrial year"
     - "industrial placement"
     - "year in industry"
@@ -85,17 +97,35 @@ title_filter:
     - "gap year placement"
     - undergraduate
     - co-op
-    - "12 month"
-    - "12-month"
-    - "13 month"
-    - "13-month"
+    # "12 month"/"13 month" alone matched 12-month fixed-term contracts, and
+    # "apprentice"/"early careers" matched degree apprenticeships and graduate
+    # roles; none are placements. Real 12-month placements still say
+    # "placement"/"industrial"/"intern" in the title.
     - "44 week"
     - "44-week"
-    - apprentice
-    - "early careers"
     - "student"
   negative:
     - senior
+    - sr
+    - "mid level"
+    - "mid-level"
+    - experienced
+    # word-boundary match, so "Undergraduate" still passes
+    - graduate
+    - grad
+    - apprentice
+    - apprenticeship
+    - ftc
+    - "fixed term"
+    - "fixed-term"
+    - "business development"
+    - "product development"
+    - "research & development"
+    - "research and development"
+    - "learning and development"
+    - "construction"
+    - mechanical
+    - buyer
     - staff
     - principal
     - lead

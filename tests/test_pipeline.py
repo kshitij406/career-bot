@@ -320,6 +320,59 @@ def test_dedup():
     assert is_new(job1, seen) is True
 
 
+def test_dedup_survives_adzuna_session_params_and_reposts():
+    seen = {
+        "https://www.adzuna.co.uk/jobs/land/ad/5867231197?se=AAA&utm_medium=api&v=1": {
+            "first_seen": "2026-09-02", "title": "2027 Software Engineer Program - Glasgow",
+            "company": "JPMorganChase", "score": 66,
+        }
+    }
+    # Same ad, fresh session token: the bug that re-notified it 174 times.
+    same_ad = {"url": "https://www.adzuna.co.uk/jobs/land/ad/5867231197?se=BBB&utm_medium=api&v=2",
+               "title": "something else", "company": "Other"}
+    assert is_new(same_ad, seen) is False
+    # Same role relisted under a new ad id, company suffix differing.
+    repost = {"url": "https://www.adzuna.co.uk/jobs/details/5999999999?utm_medium=api",
+              "title": "2027 Software Engineer Program - Glasgow", "company": "JPMorganChase Ltd"}
+    assert is_new(repost, seen) is False
+    different = {"url": "https://www.adzuna.co.uk/jobs/details/5999999998",
+                 "title": "Software Engineering Placement", "company": "JPMorganChase"}
+    assert is_new(different, seen) is True
+
+
+def test_title_filter_excludes_companies_and_summer_placement_is_penalized():
+    cfg = {"title_filter": {"role_keywords": ["software"], "positive": ["placement"],
+                            "exclude_companies": ["Hackajob"]}}
+    jobs = [{"title": "Industrial Placement Software Engineer", "company": "Hackajob Ltd"},
+            {"title": "Industrial Placement Software Engineer", "company": "Acme"}]
+    assert [j["company"] for j in title_filter(jobs, cfg)] == ["Acme"]
+    [summer] = score_jobs([{"title": "Summer Placement Software Engineer", "company": "MBDA",
+                            "location": "Edinburgh", "url": "x"}], {"scoring": {}}, "")
+    assert summer["score"] < 60, summer
+
+
+def test_scoring_fixes_from_2026_10_25_scan():
+    def one(**job):
+        job.setdefault("url", "x"); job.setdefault("company", "Acme")
+        return score_jobs([job], {"scoring": {}}, "")[0]
+    # Northern Ireland is UK; "County Antrim" is not ", CO".
+    assert "non-UK" not in one(title="Software Placement", location="Belfast, Northern Ireland")["reason"]
+    assert "non-UK" not in one(title="Software Placement", location="Newtownabbey, County Antrim")["reason"]
+    assert "non-UK" in one(title="Software Intern", location="Denver, CO")["reason"]
+    # A closing date is not a start date.
+    r = one(title="Software Engineering Industrial Placement", location="UK",
+            description="Application Deadline: 30 November 2026. 12 month placement starting September 2027.")
+    assert "start-date" not in r["reason"], r
+    # Summer internships phrased loosely still count as too short...
+    r = one(title="Software Engineer Intern (London) (Summer 2027)", location="London")
+    assert "too short" in r["reason"], r
+    r = one(title="Software Engineering Intern", location="London", description="joining us for 10 weeks in the summer")
+    assert "too short" in r["reason"], r
+    # ...but a 12-month placement that starts in the summer does not.
+    r = one(title="Software Placement", location="UK", description="A 12-month placement starting summer 2027.")
+    assert "too short" not in r["reason"], r
+
+
 class _FakeHTTPResponse:
     def __init__(self, payload):
         content = json.dumps({"score": 85, "reason": "Strong stack overlap.", "role_type": "placement"})
@@ -715,4 +768,10 @@ if __name__ == "__main__":
     print("test_notify_dry_run passed")
     test_notify_survives_discord_failure()
     print("test_notify_survives_discord_failure passed")
+    test_dedup_survives_adzuna_session_params_and_reposts()
+    print("test_dedup_survives_adzuna_session_params_and_reposts passed")
+    test_title_filter_excludes_companies_and_summer_placement_is_penalized()
+    print("test_title_filter_excludes_companies_and_summer_placement_is_penalized passed")
+    test_scoring_fixes_from_2026_10_25_scan()
+    print("test_scoring_fixes_from_2026_10_25_scan passed")
     print("all tests passed")

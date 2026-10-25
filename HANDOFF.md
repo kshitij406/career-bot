@@ -95,8 +95,6 @@ Threshold for a Discord notification: `config/profile.yml -> scoring.threshold`
 ## Constraints (see `CLAUDE.md` for the authoritative list)
 
 - No auto-apply, ever — no form-filling, no Playwright, anywhere in this repo.
-- No direct scraping of Indeed or LinkedIn, ever — no Apify, no headless
-  browser, no unofficial API. They only enter via Gmail alert parsing.
 - Nothing is ever submitted anywhere automatically.
 - `src/tailor.py` (manual tailored-CV generation) and `src/gmail_auth_setup.py`
   (one-time OAuth consent) are never invoked by `src/run.py` or the cron

@@ -4,7 +4,6 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 
 ## Constraints (do not change without explicit instruction)
 - No auto-apply, ever. There is no form-filling or Playwright code in this repo and none may be added.
-- No direct scraping of Indeed or LinkedIn, ever — no Apify, no headless browser, no unofficial API. Portal scanning goes against public ATS JSON/XML APIs (Greenhouse, Ashby, Lever, SmartRecruiters, Workable, Personio, Workday, Recruitee, Breezy HR) — the same endpoints each provider's own embedded job-search widget calls. Indeed/LinkedIn listings enter the pipeline only via `src/gmail_scan.py`, which parses job-alert emails the owner already opted into, through the read-only `gmail.readonly` Gmail API scope.
 - Reed and Adzuna are a separate category from the per-company ATS scanners: official, key-based keyword-search APIs (not scraping) that search across many employers. They live in `src/aggregators.py`, feed through the same `title_filter` as everything else, and get deduped against ATS-sourced postings before scoring.
 - Nothing gets submitted anywhere automatically. The bot notifies and scores; the owner decides and acts.
 - Discord notification only for jobs at or above the score threshold in `config/profile.yml`.
@@ -15,7 +14,7 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 - Scoring penalties must never fire on benefits/process text. A bare week count is not a duration: "16 weeks parental leave" and "3-5 weeks interview process" matched 1000+ postings before context checks were added.
 - `src/ui.py` is a manual, loopback-only tool (127.0.0.1). It must never bind 0.0.0.0, never be exposed, and never be started by the workflow. Paths it serves are confined to `output/`.
 - The Overleaf button in the UI is the ONLY action that sends CV content off the machine (to overleaf.com), and only on an explicit click. It must stay opt-in — never auto-submit.
-- CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
+- CV, profile, and personal data stay local. The only outbound endpoints are the ATS APIs (read-only), the Reed and Adzuna search APIs (read-only, key-based), the Apify API (TargetJobs actor, `APIFY_TOKEN`; receives search terms only, never CV/profile data), the Gmail API (read-only, gmail.readonly scope), the scoring/tailoring endpoint (`scoring.api_base` in `config/profile.yml`, or `$CAREER_BOT_API_BASE`; defaults to openrouter.ai, and may be pointed at a local OpenAI-compatible server such as Ollama, in which case the CV never leaves the machine), and the owner's Discord webhook. No telemetry.
 - Generated content must never fabricate experience or metrics, and must never reference any personal relationship.
 - The model must never author LaTeX markup. It returns JSON content; `src/render_latex.py` owns the template and escapes every field. Do not move escaping responsibility back into the prompt.
 
@@ -24,7 +23,7 @@ What this is: a personal job-search scanner and scorer, not a job board or an au
 config/profile.yml    owner profile, scoring model (OpenRouter slug) + threshold
 config/portals.yml    tracked companies (verified ATS slugs) + title keyword pre-filter
 config/gmail.yml      LinkedIn/Indeed alert-sender addresses + lookback window
-config/aggregators.yml  Reed/Adzuna search keywords + location default
+config/aggregators.yml  Reed/Adzuna search keywords + location default; TargetJobs actor input + run cadence
 cv.md                 canonical CV (owner-maintained)
 seen.json             dedup store, committed back by the workflow
 src/scan.py           fetch jobs from Greenhouse/Ashby/Lever/SmartRecruiters/Workable/Personio/Workday/Recruitee/Breezy public APIs; title_filter; dedupe_jobs;
@@ -32,11 +31,15 @@ src/scan.py           fetch jobs from Greenhouse/Ashby/Lever/SmartRecruiters/Wor
                         enrich_descriptions fills descriptions for SmartRecruiters/Workday,
                         whose list endpoints omit them (the pipeline's only N+1 — run late,
                         on new+filtered jobs only)
-src/aggregators.py     Reed/Adzuna keyword search across employers (official APIs, not scraping)
+src/aggregators.py     Reed/Adzuna keyword search across employers (official APIs), plus TargetJobs
+                        via the paid Apify actor (new run at most every 24h, else re-reads
+                        the last dataset for free)
 src/gmail_scan.py     parse LinkedIn/Indeed job-alert emails via read-only Gmail API
 src/gmail_auth_setup.py  MANUAL, one-time: get a Gmail OAuth refresh token
 src/score.py          OpenRouter chat-completions scoring (0-100 + reason) against profile + CV
-src/seen.py           seen.json load/save/dedup
+src/seen.py           seen.json load/save/dedup; is_new matches on URL (Adzuna session
+                        params stripped to the ad id) OR normalized (title, company), so
+                        reposts under a new id/URL never re-notify
 src/jobcache.py       jobs_cache.json (GITIGNORED): full job records incl. descriptions,
                         so the UI can fill the JD and rescore can re-run the heuristic
 src/rescore.py        MANUAL CLI: re-score seen.json from the cache (--scan to refresh
@@ -63,13 +66,12 @@ tests/                offline fixture tests (no network, no API key)
 config/f1_teams.json   2026-grid F1 teams + F1/FOM + FIA: confirmed careers_url + ats type
 seen_f1.json           F1 pipeline's own dedup store (separate from seen.json)
 src/f1_scan.py         fetch jobs from each F1 org per its ats type in f1_teams.json (reuses
-                        src/scan.py's recruitee/workable/workday fetchers + 3 new ones:
-                        Pinpoint, Haas's Drupal JSON:API, FIA's RSS feed); f1_title_filter
-                        (single include-keyword list + exclude-unless-"software" list, no
-                        scoring model); orgs with ats:"manual" (no public API found — Ferrari/
-                        SAP SuccessFactors, Red Bull/Oracle HCM, Mercedes/custom, Williams/
-                        Attrax, Audi-Sauber/custom, Racing Bulls/Red Bull portal) are skipped
-                        with a stderr notice, never scraped
+                        src/scan.py's recruitee/workable/workday fetchers, plus Pinpoint, Haas's
+                        Drupal JSON:API, FIA's RSS feed, Red Bull's Oracle HCM REST, Attrax
+                        tiles for McLaren/Williams, Mercedes's __NEXT_DATA__); f1_title_filter
+                        is the whole decision (no scorer): placement word AND tech word AND no
+                        seniority/graduate/summer word. ats:"manual" orgs (Ferrari, Audi,
+                        Racing Bulls, Liberty) are skipped with a stderr notice
 src/f1_notify.py        Discord webhook for F1 matches (reuses DISCORD_WEBHOOK_URL), one embed
                         per job, dead-link (404/410) check before posting
 src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> dedup vs
@@ -79,7 +81,7 @@ src/f1_run.py           F1 pipeline: scan -> dedupe_jobs -> f1_title_filter -> d
 
 ## How to run
 - `pip install -r requirements.txt` (Python 3.12; deps: pyyaml — everything else is stdlib `urllib`)
-- Env vars / GitHub Actions secrets: `OPENROUTER_API_KEY`, `DISCORD_WEBHOOK_URL`, `REED_API_KEY`, `ADZUNA_APP_ID` + `ADZUNA_API_KEY` (aggregators skip gracefully if unset), and (if `config/gmail.yml` is enabled) `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
+- Env vars / GitHub Actions secrets: `OPENROUTER_API_KEY`, `DISCORD_WEBHOOK_URL`, `REED_API_KEY`, `ADZUNA_APP_ID` + `ADZUNA_API_KEY`, `APIFY_TOKEN` (aggregators skip gracefully if unset), and (if `config/gmail.yml` is enabled) `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
 - Full pipeline: `python -m src.run` (concurrent scan; ~3.3x faster than serial on a 25-company sample)
 - F1 org pipeline (separate scanner, own dedup store, no scoring model): `python -m src.f1_run`
 - Tests (offline): `python tests/test_pipeline.py`

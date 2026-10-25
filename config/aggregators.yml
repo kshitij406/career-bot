@@ -7,3 +7,25 @@
 # and get deduped against ATS-sourced postings before scoring.
 keywords: "software engineer placement"
 location: "UK"
+
+# TargetJobs UK (graduate schemes, placements, internships) has no public API,
+# so it comes in through the paid Apify actor getascraper/targetjobs-uk-scraper
+# (APIFY_TOKEN env var; skipped if unset). Billed per job returned, ~$2.50 per
+# 1000 plus a little more with scrape_details. A new run starts at most once
+# per min_hours_between_runs; cron runs in between re-read the last dataset
+# for free. 40 items/day = ~1200 jobs/month, inside Apify's $5 free credit.
+# scrape_details pulls full descriptions, which the duration/summer scoring
+# rules need.
+targetjobs:
+  enabled: true
+  search_terms:
+    - "software"
+    - "computer science"
+    - "technology"
+  opportunity_types:
+    - "Placement"
+  sectors: []
+  scrape_details: true
+  max_items: 40
+  max_pages: 3
+  min_hours_between_runs: 24

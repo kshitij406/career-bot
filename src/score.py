@@ -68,6 +68,7 @@ UK_LOCATION_KEYWORDS = [
     "manchester", "birmingham", "edinburgh", "glasgow", "bristol", "leeds",
     "liverpool", "sheffield", "newcastle", "cardiff", "belfast",
     "nottingham", "cambridge", "oxford", "reading", "southampton", "brighton",
+    "northern ireland", "county antrim", "newtownabbey", "lisburn", "derry",
 ]
 # A placement year needs 44 weeks, so a 10-week summer internship can never
 # qualify. But a bare week count is a terrible signal: audited across 8957
@@ -92,8 +93,14 @@ _BENEFITS_CONTEXT_RE = re.compile(
 )
 _CONTEXT_WINDOW = 60
 
-# Unambiguous on its own — no summer programme runs 44 weeks.
-_SUMMER_RE = re.compile(r"\bsummer\s+(?:intern(?:ship)?|analyst|programme|program|scheme)\b")
+# Unambiguous on its own — no summer programme runs 44 weeks. "placement" is
+# included because "Summer Placement Software Engineer" was scoring 60 and
+# notifying every run.
+_SUMMER_RE = re.compile(r"\bsummer\s+(?:intern(?:ship)?|analyst|programme|program|scheme|placement)\b")
+# Looser summer phrasings ("Software Engineer Intern (Summer 2027)", "10 weeks
+# in the summer"). These can also describe when a 12-month placement *starts*,
+# so they only count when no long duration is stated anywhere.
+_LOOSE_SUMMER_RE = re.compile(r"\bsummer\s+(?:20\d\d|'\d\d)\b|\b(?:in|over|during)\s+the\s+summer\b")
 
 
 def _short_duration_signal(text):
@@ -107,6 +114,10 @@ def _short_duration_signal(text):
     summer = _SUMMER_RE.search(text)
     if summer:
         return summer.group(0)
+    if not any(kw in text for kw in LONG_DURATION_KEYWORDS):
+        loose = _LOOSE_SUMMER_RE.search(text)
+        if loose:
+            return loose.group(0)
     for match in _WEEK_COUNT_RE.finditer(text):
         window = text[max(0, match.start() - _CONTEXT_WINDOW): match.end() + _CONTEXT_WINDOW]
         if _BENEFITS_CONTEXT_RE.search(window):
@@ -151,7 +162,7 @@ _TITLE_STALE_YEAR_RE = re.compile(r"\b20(?:1\d|2[0-6])\b")
 _US_STATE_RE = re.compile(
     r",\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|MD|MA|MI|MN|MS|MO|"
     r"MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC"
-    r"|D\.C\.)",
+    r"|D\.C\.)(?![a-z])",  # lookahead: ", County Antrim" is not ", CO"
     re.IGNORECASE,
 )
 
@@ -165,6 +176,13 @@ RED_FLAG_KEYWORDS = ["5+ years", "7+ years", "10+ years", "phd required", "secur
 # preference. Deliberately scoped (year/month + intake-ish word, or
 # "immediate start") rather than a bare year, since a bare "2026" hits too
 # much unrelated text (copyright lines, company-founded-in-2026 mentions).
+# A date right after one of these is when applications close, not when the
+# job starts: "Application deadline: 30 November 2026", "End Date Saturday 07
+# November 2026", "Closing Date 1st November 2026" all fired the start-date
+# penalty on 2027 placements before this check.
+_DEADLINE_CONTEXT_RE = re.compile(r"deadline|clos(?:e|es|ing)|end date|apply by|submit by|until|before")
+_DEADLINE_WINDOW = 40
+
 _NEAR_TERM_START_RE = re.compile(
     r"\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|"
     r"aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|"
@@ -231,7 +249,9 @@ def _heuristic_score(job):
     # Foreign is checked first and wins: "Cambridge, MA" and "London, Ontario"
     # both contain a UK city name, so a UK-first check would score them as UK
     # and never look further.
-    foreign = _matches_location(location, NON_UK_KEYWORDS) or _US_STATE_RE.search(location)
+    # "Belfast, Northern Ireland" contains "ireland"; it's UK.
+    foreign_check = location.replace("northern ireland", "")
+    foreign = _matches_location(foreign_check, NON_UK_KEYWORDS) or _US_STATE_RE.search(foreign_check)
     if foreign:
         # Not a soft preference: the placement must be UK-based or UK-remote,
         # so an explicitly foreign office is disqualifying.
@@ -252,7 +272,13 @@ def _heuristic_score(job):
         score -= 25
         signals.append(f"experience-level red flag ({flags[0]})")
 
-    near_term = _NEAR_TERM_START_RE.search(text) or _TITLE_STALE_YEAR_RE.search(title)
+    near_term = next(
+        (
+            m for m in _NEAR_TERM_START_RE.finditer(text)
+            if not _DEADLINE_CONTEXT_RE.search(text[max(0, m.start() - _DEADLINE_WINDOW): m.start()])
+        ),
+        None,
+    ) or _TITLE_STALE_YEAR_RE.search(title)
     if near_term:
         score -= 30
         signals.append(f"start-date conflict, not available until ~July 2027 ({near_term.group(0)!r})")

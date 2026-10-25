@@ -533,15 +533,19 @@ def _kw_match(keyword, title):
 
 
 def title_filter(jobs, cfg):
-    """Keep a job iff its title has >=1 role keyword (if configured), >=1
-    positive/framing keyword, and 0 negative keywords."""
+    """Keep a job iff its company isn't in exclude_companies, its title has >=1
+    role keyword (if configured), >=1 positive/framing keyword, and 0 negative
+    keywords."""
     filt = cfg.get("title_filter", {})
     role_keywords = [r.lower() for r in filt.get("role_keywords", [])]
     positive = [p.lower() for p in filt.get("positive", [])]
     negative = [n.lower() for n in filt.get("negative", [])]
+    excluded_companies = {_company_key(c) for c in filt.get("exclude_companies", [])}
 
     kept = []
     for job in jobs:
+        if _company_key(job.get("company", "")) in excluded_companies:
+            continue
         title = job.get("title", "").lower()
         if role_keywords and not any(_kw_match(r, title) for r in role_keywords):
             continue
@@ -610,7 +614,7 @@ def _title_key(title):
 # Lower wins when the same job turns up from two sources. The employer's own
 # ATS board is canonical: its URL is the real application form rather than an
 # aggregator redirect, and its description is usually the fullest.
-SOURCE_PRIORITY = {"ats": 10, "gmail": 20, "reed": 30, "adzuna": 30}
+SOURCE_PRIORITY = {"ats": 10, "gmail": 20, "targetjobs": 25, "reed": 30, "adzuna": 30}
 DEFAULT_SOURCE_PRIORITY = 50
 
 

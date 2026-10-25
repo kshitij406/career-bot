@@ -1,8 +1,12 @@
-"""Keyword/location job search aggregators (Reed, Adzuna) — official, key-based
-public APIs. These search across many employers by keyword, unlike scan.py's
-per-company ATS scanners, so results feed through the same title_filter as
-everything else and get deduped against ATS-sourced postings afterward.
+"""Keyword/location job search aggregators (Reed, Adzuna, TargetJobs). Reed and
+Adzuna are official, key-based public APIs; TargetJobs has no API, so it comes
+in through a paid Apify actor. All search across many employers by keyword,
+unlike scan.py's per-company ATS scanners, so results feed through the same
+title_filter as everything else and get deduped against ATS-sourced postings
+afterward.
 """
+
+import datetime
 
 import base64
 import json
@@ -17,6 +21,8 @@ USER_AGENT = "career-bot/1.0"
 
 REED_URL = "https://www.reed.co.uk/api/1.0/search"
 ADZUNA_URL = "https://api.adzuna.com/v1/api/jobs/gb/search/{page}"
+APIFY_BASE = "https://api.apify.com/v2"
+TARGETJOBS_ACTOR = "getascraper~targetjobs-uk-scraper"
 
 REED_PAGE_SIZE = 100
 ADZUNA_PAGE_SIZE = 50
@@ -130,3 +136,83 @@ def fetch_adzuna_jobs(keywords, location="UK"):
         if page < MAX_PAGES:
             time.sleep(PAGE_DELAY_SECONDS)
     return jobs
+
+
+def _apify_request(path, token, payload=None, timeout=60):
+    req = urllib.request.Request(
+        f"{APIFY_BASE}{path}",
+        data=json.dumps(payload).encode("utf-8") if payload is not None else None,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+        },
+        method="POST" if payload is not None else "GET",
+    )
+    return _get_json_with_retry(req, timeout=timeout)
+
+
+def _last_targetjobs_run(token):
+    """The actor's most recent successful run, or None if it has never run."""
+    try:
+        return _apify_request(f"/acts/{TARGETJOBS_ACTOR}/runs/last?status=SUCCEEDED", token)["data"]
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+
+
+def fetch_targetjobs_jobs(cfg):
+    """TargetJobs UK via the getascraper/targetjobs-uk-scraper Apify actor.
+
+    The actor bills per job returned (~$2.50/1000, more with scrapeDetails),
+    and the cron runs every 6h. So a fresh run is only started when the last
+    successful one is older than min_hours_between_runs; in between, that
+    run's dataset is re-read, which is free. Apify keeps the state, so there's
+    no local file to commit. Repeats are harmless: seen.json drops them.
+    """
+    token = os.environ.get("APIFY_TOKEN")
+    if not token or not cfg.get("enabled", True):
+        return []
+
+    try:
+        last = _last_targetjobs_run(token)
+        min_age = datetime.timedelta(hours=cfg.get("min_hours_between_runs", 24))
+        started = (
+            datetime.datetime.fromisoformat(last["startedAt"].replace("Z", "+00:00")) if last else None
+        )
+        if started and datetime.datetime.now(datetime.timezone.utc) - started < min_age:
+            items = _apify_request(f"/datasets/{last['defaultDatasetId']}/items?clean=true", token)
+        else:
+            run_input = {
+                "searchTerms": cfg.get("search_terms", ["software"]),
+                "opportunityTypes": cfg.get("opportunity_types", []),
+                "sectors": cfg.get("sectors", []),
+                "scrapeDetails": cfg.get("scrape_details", True),
+                "maxItems": cfg.get("max_items", 40),
+                "maxPages": cfg.get("max_pages", 3),
+            }
+            # run-sync caps at 300s server-side; the client timeout sits just past it.
+            items = _apify_request(
+                f"/acts/{TARGETJOBS_ACTOR}/run-sync-get-dataset-items?timeout=290",
+                token,
+                payload=run_input,
+                timeout=310,
+            )
+    except Exception as e:  # noqa: BLE001 - one aggregator failing must not break the pipeline
+        print(f"warning: targetjobs (apify) failed: {e}", file=sys.stderr)
+        return []
+
+    return [
+        {
+            "title": r.get("title", ""),
+            "url": r.get("jobUrl", "") or r.get("applicationUrl", ""),
+            "company": r.get("company", ""),
+            "location": r.get("location", ""),
+            "description": r.get("description", "") or "",
+            "posted_date": (r.get("postedAt") or "")[:10],
+            "source": "targetjobs",
+        }
+        for r in items
+        if r.get("jobUrl") or r.get("applicationUrl")
+    ]

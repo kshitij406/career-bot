@@ -11,51 +11,41 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.f1_scan import f1_title_filter
 
 
-def test_f1_title_filter_keeps_software_roles():
+def test_f1_title_filter_keeps_tech_placements():
     jobs = [
         {"title": "Software Engineer Intern"},
-        {"title": "IT Support Technician"},
-        {"title": "Data Platform Engineer"},
-        {"title": ".NET Developer"},
+        {"title": "AI Engineering Student Placement"},
+        {"title": "IT Service Desk Student Placement"},
+        {"title": "Aero Development Tools Student Placement"},
+        {"title": "Data Platform Industrial Placement"},
     ]
     kept = f1_title_filter(jobs)
     assert [j["title"] for j in kept] == [j["title"] for j in jobs]
-    print("test_f1_title_filter_keeps_software_roles passed")
+    print("test_f1_title_filter_keeps_tech_placements passed")
 
 
-def test_f1_title_filter_drops_non_software_and_excluded():
+def test_f1_title_filter_drops_non_placements_and_non_tech():
     jobs = [
-        {"title": "Head Mechanic"},
-        {"title": "Composite Technician"},
-        {"title": "Aerodynamicist"},
-        {"title": "Trackside Systems Support"},  # has "systems" but not an include keyword
-        {"title": "Hospitality Coordinator"},
-        {"title": "Finance Analyst"},
-        {"title": "Marketing Manager"},
+        {"title": "Senior Software Engineer"},          # no placement framing
+        {"title": "Platform Engineer"},                 # no placement framing
+        {"title": "Graduate Electronics Engineer"},     # graduate
+        {"title": "HR Student Placement"},              # no tech word
+        {"title": "Mechanical Design Student Placement"},
+        {"title": "Software Lead Intern"},              # seniority word
+        {"title": "Composite Design Engineer"},
     ]
     assert f1_title_filter(jobs) == []
-    print("test_f1_title_filter_drops_non_software_and_excluded passed")
-
-
-def test_f1_title_filter_excluded_word_allowed_alongside_software():
-    jobs = [{"title": "Trackside Software Engineer"}]
-    kept = f1_title_filter(jobs)
-    assert [j["title"] for j in kept] == ["Trackside Software Engineer"]
-    print("test_f1_title_filter_excluded_word_allowed_alongside_software passed")
+    print("test_f1_title_filter_drops_non_placements_and_non_tech passed")
 
 
 def test_f1_title_filter_it_keyword_needs_word_boundary():
-    # "it" must not match inside "Composite" (which is excluded anyway) or
-    # any other word containing the letters "it".
-    jobs = [{"title": "Composite Design Engineer"}]  # "engineer" makes this pass the include
-    # gate, but "composite" is an exclude keyword and "software" isn't present.
-    assert f1_title_filter(jobs) == []
+    # "it" must not match inside "Composite"/"Recruitment".
+    assert f1_title_filter([{"title": "Recruitment Student Placement"}]) == []
     print("test_f1_title_filter_it_keyword_needs_word_boundary passed")
 
 
 if __name__ == "__main__":
-    test_f1_title_filter_keeps_software_roles()
-    test_f1_title_filter_drops_non_software_and_excluded()
-    test_f1_title_filter_excluded_word_allowed_alongside_software()
+    test_f1_title_filter_keeps_tech_placements()
+    test_f1_title_filter_drops_non_placements_and_non_tech()
     test_f1_title_filter_it_keyword_needs_word_boundary()
     print("all f1 tests passed")

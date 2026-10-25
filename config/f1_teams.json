@@ -3,9 +3,9 @@
   "teams": [
     {
       "name": "McLaren Racing",
-      "careers_url": "https://racingcareers.mclaren.com/",
-      "ats": "recruitee",
-      "slug": "mclaren"
+      "careers_url": "https://racingcareers.mclaren.com",
+      "ats": "attrax",
+      "notes": "Moved off Recruitee (board now empty) to Attrax; verified 2026-10-25."
     },
     {
       "name": "Scuderia Ferrari",
@@ -16,14 +16,16 @@
     {
       "name": "Red Bull Racing",
       "careers_url": "https://careers.redbullracing.com/",
-      "ats": "manual",
-      "notes": "Oracle Fusion Cloud Recruiting (Oracle HCM) — JS-rendered SPA, no public API found."
+      "ats": "oracle_hcm",
+      "notes": "Oracle Recruiting Cloud; public CE REST endpoint, site CX_2 (verified 2026-10-25, 23 live reqs).",
+      "host": "iagtme.fa.ocs.oraclecloud.com",
+      "site": "CX_2"
     },
     {
       "name": "Mercedes-AMG Petronas F1 Team",
       "careers_url": "https://www.mercedesamgf1.com/careers/vacancies",
-      "ats": "manual",
-      "notes": "Custom Next.js/Contentful build with internal auth on the apply flow; no public API found."
+      "ats": "mercedes_next",
+      "notes": "Next.js site; vacancies are in the page __NEXT_DATA__ (verified 2026-10-25, 7 live)."
     },
     {
       "name": "Aston Martin Aramco F1 Team",
@@ -34,8 +36,8 @@
     {
       "name": "Williams Racing",
       "careers_url": "https://careers.williamsf1.com/",
-      "ats": "manual",
-      "notes": "Attrax recruitment platform — no clean JSON endpoint found. A legacy Workday instance (alcority.wd1.myworkdayjobs.com/WilliamsRacing) exists but currently 403s / redirects to a maintenance page."
+      "ats": "attrax",
+      "notes": "Attrax board, server-rendered vacancy tiles at /jobs?page=N (verified 2026-10-25, 34 live jobs)."
     },
     {
       "name": "Audi F1 Team",

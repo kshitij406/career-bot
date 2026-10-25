@@ -5,7 +5,7 @@ Run as: python -m src.run
 
 import yaml
 
-from src.aggregators import fetch_adzuna_jobs, fetch_reed_jobs
+from src.aggregators import fetch_adzuna_jobs, fetch_reed_jobs, fetch_targetjobs_jobs
 from src.gmail_scan import scan_gmail_alerts
 from src.jobcache import load_cache, save_cache, update_cache
 from src.notify import notify
@@ -39,6 +39,7 @@ def main():
     scanned = (
         scan_all(portals)
         + scan_gmail_alerts(gmail_cfg)
+        + fetch_targetjobs_jobs(aggregators_cfg.get("targetjobs", {}))
         + fetch_reed_jobs(keywords, location)
         + fetch_adzuna_jobs(keywords, location)
     )
